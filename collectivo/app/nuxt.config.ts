@@ -5,7 +5,6 @@ export default defineNuxtConfig({
   extends: [
     "@collectivo/collectivo",
     "@collectivo/memberships",
-    "collectivo_mila",
   ],
   i18n: {
     lazy: true,
