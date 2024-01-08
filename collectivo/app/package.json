@@ -14,7 +14,8 @@
   },
   "dependencies": {
     "@collectivo/collectivo": "workspace:*",
-    "@collectivo/memberships": "workspace:*"
+    "@collectivo/memberships": "workspace:*",
+    "@collectivo/collectivo-csa": "workspace:*"
   },
   "devDependencies": {
     "@nuxt/devtools": "^1.0.6",
