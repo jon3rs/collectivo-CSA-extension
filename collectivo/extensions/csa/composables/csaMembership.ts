@@ -4,9 +4,9 @@ import {
 
 
 
-export async function getCSAmemberships(){
+export async function getCSAMemberships(){
     const directus = await useDirectus();
-    console.log(useDirectus());
+    console.log(directus);
     const memberships = await directus.request(readItems("csa_membership"));
 
     return memberships;

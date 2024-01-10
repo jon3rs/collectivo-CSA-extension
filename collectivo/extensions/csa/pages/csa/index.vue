@@ -1,5 +1,5 @@
 <script lang="ts">
-const csaMemberships = getCSAmemberships();
+const csaMemberships = getCSAMemberships();
 console.log(csaMemberships);
 </script>
 
