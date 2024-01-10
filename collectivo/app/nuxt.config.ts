@@ -4,6 +4,7 @@ export default defineNuxtConfig({
   ssr: false,
   extends: [
     "@collectivo/collectivo",
+    "@collectivo/payments",
     "@collectivo/memberships",
     "@collectivo/collectivo-csa"
   ],
