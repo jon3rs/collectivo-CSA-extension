@@ -1,6 +1,6 @@
 {
   "name": "@collectivo/collectivo-csa",
-  "description": "An example for an extension of collectivo.",
+  "description": "An extension of collectivo for csa.",
   "version": "0.0.1",
   "type": "module",
   "license": "Unlicense",
@@ -10,6 +10,7 @@
     "dev": "nuxt dev --p 3100",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
     "test": "vitest run",
     "format": "prettier --cache --check .",
     "format:fix": "prettier --cache --check . --write",

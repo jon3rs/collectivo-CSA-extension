@@ -2,8 +2,8 @@
 export default defineAppConfig({
   mainMenuItems: {
     membership: {
-      label: "Membership",
-      link: "/membership",
+      label: "CSA",
+      link: "/csa",
       order: 10,
     },
   },
