@@ -31,10 +31,21 @@ declare global {
     collectivo_members: CollectivoMember[] | number[];
   }
 
+  interface CollectivoTileButton {
+    id: number;
+    collectivo_label: string;
+    collectivo_path: string;
+    collectivo_is_external: boolean;
+  }
+
   interface CollectivoTile {
     id: number;
     name: string;
     content: string;
+    status: "published" | "draft" | "archived";
+    sort: number;
+    collectivo_buttons: CollectivoTileButton[];
+    collectivo_color: string;
   }
 
   interface CollectivoExtension {
@@ -162,10 +173,17 @@ declare global {
     // TODO: Add operator?: "==" | "!=" | ">" | "<" | ">=" | "<=";
   }
 
-  interface FormValidator {
-    type: "min" | "max" | "email" | "url" | "regex";
-    value?: string | number | RegExp;
-  }
+  type FormValidator =
+    | {
+        type: "min" | "max" | "email" | "url" | "regex";
+        value?: string | number | RegExp;
+        message?: string;
+      }
+    | {
+        type: "test" | "transform";
+        value: string;
+        message?: string;
+      };
 }
 
 // Types for input of app.config.ts
