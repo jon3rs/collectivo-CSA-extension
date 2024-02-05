@@ -1,28 +1,25 @@
-import { 
-    readItem,
-    readItems
-} from "@directus/sdk" ;
+import { readItem, readItems } from "@directus/sdk";
 
-export async function getCSAShareSizes(){
-    const directus = await useDirectus();
-    const shareSizes: [] = await directus.request(readItems("csa_share_size"));
-    return shareSizes;
+export async function getCSAShareSizes(): Promise<csaShareSize[]>{
+  const directus = await useDirectus();
+  const shareSizes: csaShareSize[] = await directus.request(readItems("csa_share_size"));
+  return shareSizes;
 }
 
-export async function getCSAShareTypes(){
-    const directus = await useDirectus();
-    const shareTypes: [] = await directus.request(readItems("csa_share_type"));
-    return shareTypes;
+export async function getCSAShareTypes(): Promise<csaShareType[]> {
+  const directus = await useDirectus();
+  const shareTypes: csaShareType[] = await directus.request(readItems("csa_share_type"));
+  return shareTypes;
 }
 
-export async function getCSAShareTypeById(id: number){
-    const directus = await useDirectus();
-    const shareType = await directus.request(readItem("csa_share_type", id));
-    return shareType;
-}   
+export async function getCSAShareTypeById(id: number): Promise<csaShareType> {
+  const directus = await useDirectus();
+  const shareType: csaShareType = await directus.request(readItem("csa_share_type", id));
+  return shareType;
+}
 
-export async function getCSAShareSizeById(id: number){
-    const directus = await useDirectus();
-    const shareSize = await directus.request(readItem("csa_share_size", id));
-    return shareSize;
+export async function getCSAShareSizeById(id: number): Promise<csaShareSize>{
+  const directus = await useDirectus();
+  const shareSize: csaShareSize = await directus.request(readItem("csa_share_size", id));
+  return shareSize;
 }

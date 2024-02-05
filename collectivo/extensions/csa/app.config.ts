@@ -1,4 +1,3 @@
-
 export default defineAppConfig({
   mainMenuItems: {
     membership: {

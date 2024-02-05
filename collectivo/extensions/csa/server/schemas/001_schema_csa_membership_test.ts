@@ -25,7 +25,6 @@ schema.collections = [
 schema.fields = [
   ...directusSystemFields("csa_membership"),
 
-
   {
     collection: "csa_membership",
     field: "csa_membership_of",
@@ -37,10 +36,10 @@ schema.fields = [
       display_options: {
         template: "{{first_name}} {{last_name}}",
       },
-      options:{
+      options: {
         enableCreate: false,
-      }
-    }
+      },
+    },
   },
   {
     collection: "directus_users",
@@ -50,8 +49,7 @@ schema.fields = [
       special: ["o2m"],
     },
     type: "alias",
-  }
-
+  },
 ];
 
 schema.relations = [
@@ -66,19 +64,16 @@ schema.relations = [
       on_delete: "SET NULL",
     },
   },
-]
+];
 
 // Here you can define custom translations
 // See https://docs.directus.io/reference/system/translations.html
-schema.translations = [
-];
+schema.translations = [];
 
 // To create relations, you can use the following helper functions
 // schema.createM2ORelation();
 // schema.createM2MRelation();
 // schema.createM2ARelation();
-
-
 
 schema.permissions = [
   {

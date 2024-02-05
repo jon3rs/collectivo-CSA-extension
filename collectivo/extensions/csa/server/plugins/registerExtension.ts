@@ -12,7 +12,12 @@ export default defineNitroPlugin(() => {
     description: pkg.description,
     version: pkg.version,
     schemas: [
-      combineSchemas("collectivo-csa", "0.0.1",[s001_test_migration, s001_csa_share_of_membership, s001_csa_share, s001_csa_depot])
+      combineSchemas("collectivo-csa", "0.0.1", [
+        s001_test_migration,
+        s001_csa_share_of_membership,
+        s001_csa_share,
+        s001_csa_depot,
+      ]),
     ],
     examples: examples,
   });

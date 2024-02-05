@@ -6,7 +6,7 @@ export default defineNuxtConfig({
     "@collectivo/collectivo",
     "@collectivo/payments",
     "@collectivo/memberships",
-    "@collectivo/collectivo-csa"
+    "@collectivo/collectivo-csa",
   ],
   i18n: {
     lazy: true,
