@@ -9,7 +9,7 @@ const props = defineProps({
 const emit = defineEmits(["refreshMemberships"]);
 
 const membershipOwner = await getUserByID(
-  props.csaMembership.csa_membership_of
+  props.csaMembership.csa_membership_of,
 );
 
 async function deleteMembership(id: number) {

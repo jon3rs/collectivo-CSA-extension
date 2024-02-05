@@ -5,6 +5,7 @@ const props = defineProps({
     required: true,
   },
 });
+
 onBeforeMount(() => {
   refreshShare().then(async () => {
     console.log("share: ", share.value.of_share_size);
@@ -13,9 +14,11 @@ onBeforeMount(() => {
     shareType.value = await getCSAShareTypeById(shareSize.value.of_type);
   });
 });
+
 const emit = defineEmits(["refreshDepot"]);
 
 const share = ref({});
+
 const refreshShare = async () => {
   console.log("refreshing share");
   share.value = await getCSAShareOfMemberShipById(props.csaShare);
@@ -26,8 +29,10 @@ console.log("share: ", share);
 const shareSize = ref({});
 const shareType = ref({});
 const depot = ref({});
+
 const refreshDepot = async () => {
   console.log("refreshing depot");
+
   depot.value = await getCSADepotById(share.value.default_depot).then((res) => {
     console.log("depot: ", res);
     return res;
@@ -38,12 +43,15 @@ console.log(props.csaShare);
 const depotForm = ref(false);
 const csaDepots = await getCSADepots();
 const checkedDepot = ref("");
+
 function toggleDepotForm() {
   depotForm.value = !depotForm.value;
 }
+
 async function updateDepot(newDepot: number) {
   await updateDefaultDepot(props.csaShare, newDepot).then(() => {
     console.log(newDepot);
+
     refreshShare().then(() => {
       refreshDepot();
       toggleDepotForm();
@@ -77,10 +85,10 @@ async function updateDepot(newDepot: number) {
         <ul>
           <li v-for="depot in csaDepots" :key="depot">
             <input
+              v-model="checkedDepot"
               type="radio"
               :value="depot.id"
               name="{{ depot.id }}"
-              v-model="checkedDepot"
             />
             <label for="{{ depot.id }}"> {{ depot.csa_depot_name }}</label>
           </li>
