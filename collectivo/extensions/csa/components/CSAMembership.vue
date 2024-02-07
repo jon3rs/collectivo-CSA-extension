@@ -9,7 +9,7 @@ const props = defineProps({
 const emit = defineEmits(["refreshMemberships"]);
 
 const membershipOwner = await getUserByID(
-  props.csaMembership.csa_membership_of,
+  props.csaMembership.csa_membership_of
 );
 
 async function deleteMembership(id: number) {
@@ -20,7 +20,7 @@ async function deleteMembership(id: number) {
 </script>
 
 <template>
-  <div class="my-5 rounded-xl bg-white shadow-sidebar px-3 py-5 flex">
+  <div class="container">
     <h2 class="mr-4">
       Mitgliedschaft von {{ membershipOwner.first_name }}
       {{ membershipOwner.last_name }}
@@ -31,3 +31,9 @@ async function deleteMembership(id: number) {
     </UButton>
   </div>
 </template>
+
+<style scoped lang="scss">
+.container {
+  @apply my-5 rounded-xl bg-white shadow-sidebar px-3 py-5 flex;
+}
+</style>
