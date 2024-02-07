@@ -11,24 +11,42 @@ function convertToDate(date: string) {
 }
 
 async function createDeliveries() {
-  if (!weeklyToggle.value) {
-    await createCSADelivery(convertToDate(startdate.value)).then((res) => {
-      console.log("created new delivery: ", res);
-    });
+  let deliveryIds: number[] = [];
 
+  if (!weeklyToggle.value) {
+    console.log("weeklyToggle: ", weeklyToggle.value);
+
+    await createCSADelivery(convertToDate(startdate.value)).then(
+      async (res) => {
+        deliveryIds.push(res.id);
+        console.log("created new delivery: ", res);
+        console.log("now creating recurring share instances");
+        await createRecurringShareInstancesForDeliveries(deliveryIds);
+      },
+    );
+
+    deliveryIds = [];
     return;
   } else {
+    console.log("weeklyToggle: ", weeklyToggle.value);
+    console.log("creating multiple deliveries", deliveriesAmount.value);
+
     for (let i = 0; i < deliveriesAmount.value; i++) {
       await createCSADelivery(
         new Date(
           convertToDate(startdate.value).setDate(
-            convertToDate(startdate.value).getDate() + i * 7
-          )
-        )
+            convertToDate(startdate.value).getDate() + i * 7,
+          ),
+        ),
       ).then((res) => {
+        deliveryIds.push(res.id);
         console.log("created new delivery: ", res);
       });
     }
+
+    console.log("created new deliveries");
+    console.log("now creating recurring share instances");
+    await createRecurringShareInstancesForDeliveries(deliveryIds);
 
     return;
   }
@@ -41,9 +59,9 @@ const deliveries = computed(() => {
     deliveries.push(
       new Date(
         convertToDate(startdate.value).setDate(
-          convertToDate(startdate.value).getDate() + i * 7
-        )
-      )
+          convertToDate(startdate.value).getDate() + i * 7,
+        ),
+      ),
     );
   }
 
@@ -61,29 +79,29 @@ const deliveries = computed(() => {
       <div>
         <label for="startdate">Lieferdatum:</label>
         <input
+          id="startdate"
+          v-model="startdate"
           type="text"
           name="startdate"
-          id="startdate"
           placeholder="2024-02-14"
-          v-model="startdate"
         />
         <label for="weeklyToggle"> wöchentliche Lieferung erstellen</label>
         <input
-          type="checkbox"
-          name="weeklyToggle"
           id="weeklyToggle"
           v-model="weeklyToggle"
+          type="checkbox"
+          name="weeklyToggle"
         />
         <label for="deliveriesAmount">Anzahl an Lieferungen:</label>
         <input
+          id="deliveriesAmount"
+          v-model="deliveriesAmount"
           type="text"
           name="deliveriesAmount"
-          id="deliveriesAmount"
           placeholder="5"
           :disabled="!weeklyToggle"
-          v-model="deliveriesAmount"
         />
-        <UButton @click="createDeliveries()" :disabled="!startdate">
+        <UButton :disabled="!startdate" @click="createDeliveries()">
           Lieferung erstellen
         </UButton>
       </div>

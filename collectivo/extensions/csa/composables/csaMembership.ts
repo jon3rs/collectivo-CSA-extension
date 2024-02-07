@@ -63,7 +63,7 @@ export async function getFieldsByCollection(collection_name: string) {
   const result = await directus.request(
     readFieldsByCollection(collection_name),
   );
-  
+
   return result;
 }
 

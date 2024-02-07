@@ -12,10 +12,15 @@ export default async function examples() {
   );
 
   await directus.request(deleteItems("csa_depot", { limit: 1000 }));
+
+  await directus.request(
+    deleteItems("csa_recurring_share_instance", { limit: 1000 }),
+  );
+
   await directus.request(deleteItems("csa_delivery", { limit: 1000 }));
   let exampleTypeID = 1;
 
-   //create example data for csa_share_type 
+  //create example data for csa_share_type
   try {
     await directus
       .request(
@@ -52,7 +57,6 @@ export default async function examples() {
     console.info(error);
   }
 
-
   //create example data for csa_depot
   const depots = [
     "Limes",
@@ -77,7 +81,6 @@ export default async function examples() {
   }
 
   //create example data for csa_delivery
-  
 
   /*  const directus = await useDirectusAdmin();
     const exampleMemberships = [ "mambo nr 6", "abholgemeinschaft süd", "abholgemeinschaft nord", "abholgemeinschaft west", "abholgemeinschaft ost"];

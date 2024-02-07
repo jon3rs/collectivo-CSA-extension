@@ -28,6 +28,8 @@ schema.collections = [
 ];
 
 schema.fields = [
+  ...directusSystemFields("csa_share_type"),
+  ...directusSystemFields("csa_share_size"),
   {
     collection: "csa_share_type",
     field: "csa_share_type_name",
@@ -82,9 +84,6 @@ schema.fields = [
     },
     type: "alias",
   },
-
-  ...directusSystemFields("csa_share_type"),
-  ...directusSystemFields("csa_share_size"),
 ];
 
 schema.relations = [

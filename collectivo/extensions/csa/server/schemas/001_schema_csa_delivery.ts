@@ -11,6 +11,8 @@ schema.collections = [
 ];
 
 schema.fields = [
+  ...directusSystemFields("csa_delivery"),
+
   {
     collection: "csa_delivery",
     field: "date_of_delivery",
@@ -22,12 +24,12 @@ schema.fields = [
   {
     collection: "csa_delivery",
     field: "csa_recurring_share_instance",
-    meta:{
+    meta: {
       interface: "list-o2m",
-      special: ["o2m"]
+      special: ["o2m"],
     },
-    type: "alias"
-  }
+    type: "alias",
+  },
 ];
 
 schema.permissions = [
@@ -60,7 +62,3 @@ schema.permissions = [
     fields: ["*"],
   },
 ];
-
-
-
-

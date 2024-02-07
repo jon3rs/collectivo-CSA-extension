@@ -94,8 +94,7 @@ schema.fields = [
       interface: "list-o2m",
       special: ["o2m"],
     },
-  }
-  
+  },
 ];
 
 schema.relations = [
@@ -158,6 +157,4 @@ schema.permissions = [
   },
 ];
 
-schema.flows = [
-  
-]
+schema.flows = [];

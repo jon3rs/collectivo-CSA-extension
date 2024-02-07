@@ -1,4 +1,3 @@
-
 declare global {
   interface csaMembership {
     id: number;
@@ -9,12 +8,21 @@ declare global {
   interface csaShareOfMembership {
     id: number;
     of_share_size: number;
+    default_depot: number;
+    of_membership: number;
+    csa_recurring_share_instance: number[] | null;
     [key: string]: string | undefined;
+  }
+
+  interface csaRecurringShareInstance {
+    id: number;
+    for_delivery: number;
+    for_share_of_membership: number;
   }
 
   interface csaShareSize {
     id: number;
-    csa_share_size_name: string ;
+    csa_share_size_name: string;
   }
 
   interface csaShareType {
