@@ -19,23 +19,21 @@ schema.collections = [
     },
     meta: {
       group: "payments",
-      archive_field: "payments_archived",
-      archive_value: "true",
-      unarchive_value: "false",
       sort: 100,
       icon: "category",
+      display_template: "{{payments_name}}",
       translations: [
         {
           language: "en-US",
-          translation: "Items",
-          singular: "Item",
-          plural: "Item",
+          translation: "Invoice Items",
+          singular: "Invoice Item",
+          plural: "Invoice Item",
         },
         {
           language: "de-DE",
-          translation: "Artikel",
-          singular: "Artikel",
-          plural: "Artikel",
+          translation: "Rechnungsartikel",
+          singular: "Rechnungsartikel",
+          plural: "Rechnungsartikel",
         },
       ],
     },
@@ -52,6 +50,7 @@ schema.collections = [
       hidden: true,
       sort: 100,
       icon: "receipt",
+      display_template: "{{payments_quantity}} {{payments_item.payments_name}}",
       translations: [
         {
           language: "en-US",
@@ -79,6 +78,7 @@ schema.collections = [
       group: "payments",
       sort: 100,
       icon: "receipt",
+      display_template: "{{payments_entries}}",
       translations: [
         {
           language: "en-US",
@@ -125,23 +125,11 @@ schema.fields = [
     meta: {
       interface: "input",
       required: true,
+      note: "Price is in cents.",
       width: "half",
       translations: [
         { language: "de-DE", translation: "Preis" },
         { language: "en-US", translation: "Price" },
-      ],
-    },
-  },
-  {
-    collection: "payments_items",
-    field: "payments_archived",
-    type: "boolean",
-    schema: { default_value: false, is_nullable: false },
-    meta: {
-      width: "half",
-      translations: [
-        { language: "de-DE", translation: "Archiviert" },
-        { language: "en-US", translation: "Archived" },
       ],
     },
   },
@@ -159,7 +147,7 @@ schema.fields = [
       options: {
         enableSelect: false,
         template:
-          "{{payments_item.name}}:{{payments_quantity}}*{{payments_price}}",
+          "{{payments_item.payments_name}}:{{payments_quantity}}*{{payments_price}}",
       },
       display: "related-values",
       display_options: {
@@ -277,6 +265,18 @@ schema.fields = [
       ],
     },
   },
+  {
+    collection: "payments_invoices_out",
+    field: "payments_notes",
+    type: "text",
+    meta: {
+      interface: "input-multiline",
+      translations: [
+        { language: "de-DE", translation: "Notizen" },
+        { language: "en-US", translation: "Notes" },
+      ],
+    },
+  },
 
   // Invoice entries
   {
@@ -325,10 +325,11 @@ schema.fields = [
   {
     collection: "payments_invoices_entries",
     field: "payments_price",
-    type: "integer", // prices always in cents
+    type: "integer",
     meta: {
       interface: "input",
       required: true,
+      note: "Price is in cents.",
       width: "half",
       translations: [
         { language: "de-DE", translation: "Preis" },

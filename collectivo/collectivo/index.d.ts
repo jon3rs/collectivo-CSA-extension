@@ -68,6 +68,7 @@ declare global {
   interface CollectivoMenus {
     main: CollectivoMenuItem[];
     public: CollectivoMenuItem[];
+    profile: CollectivoMenuItem[];
   }
 
   interface CollectivoMenuItem {
@@ -100,7 +101,7 @@ declare global {
 
   interface CollectivoFormFieldBase {
     order: number;
-    width?: "full" | "xl" | "lg" | "md" | "sm" | "xs";
+    width?: "full" | "half" | "xl" | "lg" | "md" | "sm" | "xs";
     conditions?: FormCondition[];
     _visible?: Ref<boolean>;
   }
@@ -149,9 +150,14 @@ declare global {
         expand?: boolean;
       }
     | {
-        type: "text" | "number" | "email" | "password" | "textarea" | "date";
+        type: "text" | "number" | "email" | "password" | "textarea";
         placeholder?: string;
         icon?: string;
+      }
+    | {
+        type: "date";
+        datepicker?: boolean;
+        birthdate?: boolean;
       }
     | {
         type: "checkbox";
