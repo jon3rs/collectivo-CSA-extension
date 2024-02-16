@@ -16,6 +16,9 @@ schema.collections = [
     },
     meta: {
       display_template: "{{csa_membership_of}}",
+      group: "collectivo_csa_extension",
+      color: "#FF8962",
+      icon: "switch_account"
     },
   },
 ];

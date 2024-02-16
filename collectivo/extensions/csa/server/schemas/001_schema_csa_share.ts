@@ -12,6 +12,9 @@ schema.collections = [
     },
     meta: {
       display_template: "{{csa_share_type_name}}",
+      group: "collectivo_csa_extension",
+      color: "#FF8962",
+      icon: "nutrition",
     },
   },
   {
@@ -23,6 +26,9 @@ schema.collections = [
     },
     meta: {
       display_template: "{{csa_share_size_name}}",
+      group: "collectivo_csa_extension",
+      color: "#FF8962",
+      icon: "arrow_range"
     },
   },
 ];

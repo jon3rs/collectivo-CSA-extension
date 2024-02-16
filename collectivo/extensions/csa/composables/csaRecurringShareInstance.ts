@@ -1,9 +1,9 @@
-import { createItem, createItems, readItems, readItem } from "@directus/sdk";
+import { createItem, createItems, readItems, readItem, updateItem } from "@directus/sdk";
 
 export async function createRecurringShareInstances() {
   const directus = await useDirectus();
 
-  const sharesOfMemberships: csaShareOfMembership[] = await directus.request(
+  const sharesOfMemberships = await directus.request(
     readItems("csa_share_of_membership"),
   );
 
@@ -24,7 +24,7 @@ export async function createRecurringShareInstances() {
 }
 
 export async function createRecurringShareInstancesFor(
-  shareOfMemberShipId: number,
+  shareOfMembership: csaShareOfMembership,
 ) {
   const directus = await useDirectus();
 
@@ -37,13 +37,14 @@ export async function createRecurringShareInstancesFor(
       "creating share instance for delivery: " +
         delivery.id +
         " and shareOfMembership: " +
-        shareOfMemberShipId,
+        shareOfMembership,
     );
 
     await directus.request(
       createItem("csa_recurring_share_instance", {
         for_delivery: delivery.id,
-        for_share_of_membership: shareOfMemberShipId,
+        for_share_of_membership: shareOfMembership.id,
+        csa_recurring_share_instance_depot: shareOfMembership.default_depot,
       }),
     );
   });
@@ -64,6 +65,7 @@ export async function createRecurringShareInstancesForDeliveries(
         createItem("csa_recurring_share_instance", {
           for_delivery: deliveryId,
           for_share_of_membership: shareOfMembership.id,
+          csa_recurring_share_instance_depot: shareOfMembership.default_depot,
         }),
       );
     });
@@ -80,4 +82,31 @@ export async function getCSARecurringShareInstanceById(
   );
 
   return shareInstance;
+}
+
+export async function updateCSARecurringShareInstanceStatus(
+  id: number,
+  status: boolean,
+): Promise<csaRecurringShareInstance>{
+  const directus = await useDirectus();
+
+  const updatedShareInstance: csaRecurringShareInstance = await directus.request(
+    updateItem("csa_recurring_share_instance", id, {
+      csa_share_instance_status: status,
+    }),
+  );
+  
+  return updatedShareInstance;
+}
+
+export async function updateCSARecurringShareInstanceDepot(id: number,  depot: number): Promise<csaRecurringShareInstance>{
+  const directus = await useDirectus();
+
+  const updatedShareInstance: csaRecurringShareInstance = await directus.request(
+    updateItem("csa_recurring_share_instance", id, {
+      csa_recurring_share_instance_depot: depot,
+    }),
+  );
+  
+  return updatedShareInstance;
 }

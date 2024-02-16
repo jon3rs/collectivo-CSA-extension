@@ -6,7 +6,7 @@ export async function getCSASharesOfMembership(
   const directus = await useDirectus();
 
   const shareOfMembership: csaShareOfMembership[] = await directus.request(
-    readItems("csa_share_of_membership", { filter: { of_membership: id } }),
+    readItems("csa_share_of_membership", { filter: { of_membership: { _eq: id } } }),
   );
 
   return shareOfMembership;

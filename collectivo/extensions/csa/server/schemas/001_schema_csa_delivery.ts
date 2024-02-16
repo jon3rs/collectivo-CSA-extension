@@ -5,7 +5,11 @@ export default schema;
 schema.collections = [
   {
     collection: "csa_delivery",
-    meta: {},
+    meta: {
+      group: "collectivo_csa_extension",
+      color: "#FF8962",
+      icon: "local_shipping",
+    },
     schema: {},
   },
 ];

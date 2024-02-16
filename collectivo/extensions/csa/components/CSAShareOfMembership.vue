@@ -18,7 +18,7 @@ onBeforeMount(() => {
 const emit = defineEmits(["refreshDepot"]);
 
 const share = ref<csaShareOfMembership>(
-  await getCSAShareOfMemberShipById(props.csaShare),
+  await getCSAShareOfMemberShipById(props.csaShare)
 ); //ref<csaShareOfMembership>();
 
 const refreshShare = async () => {
@@ -63,7 +63,7 @@ async function updateDepot(newDepot: number) {
 </script>
 
 <template>
-  <div>
+  <div class="w-full">
     <div class="rounded-xl bg-white shadow-sidebar px-3 py-5">
       <p>the id of your share is {{ share.id }}</p>
       <div class="mt-2">

@@ -33,7 +33,7 @@ async function addShare(id: number, shareSizeId: number, depotId: number) {
   await addCSAShareToMembership(id, shareSizeId, depotId).then(async (res) => {
     console.log("now creating recurring share instances", res);
 
-    await createRecurringShareInstancesFor(res.id).then(() => {
+    await createRecurringShareInstancesFor(res).then(() => {
       console.log("created recurring share instances: ", res);
     });
 
@@ -49,7 +49,7 @@ const checkedDepot = ref("");
 </script>
 
 <template>
-  <div>
+  <div class="w-full">
     <h1>My Shares:</h1>
     <div
       v-if="memberships.length == 0"
@@ -114,7 +114,7 @@ const checkedDepot = ref("");
             create share
           </UButton>
         </div>
-        <div v-else class="flex">
+        <div v-else class="w-full">
           <div v-for="share in membership.csa_share_of_membership" :key="share">
             <CSAShareOfMembership
               :csa-share="share"

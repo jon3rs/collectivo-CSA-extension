@@ -5,7 +5,11 @@ export default schema;
 schema.collections = [
   {
     collection: "csa_depot",
-    meta: {},
+    meta: {
+      group: "collectivo_csa_extension",
+      color: "#FF8962",
+      icon: "store",
+    },
     schema: {},
   },
 ];
@@ -41,6 +45,15 @@ schema.fields = [
     },
     type: "alias",
   },
+  {
+    collection: "csa_depot",
+    field: "csa_recurring_share_instance",
+    meta: {
+      interface: "list-o2m",
+      special: ["o2m"],
+    },
+    type: "alias",
+  }
 ];
 
 schema.permissions = [

@@ -8,14 +8,14 @@ import {
   readCollection,
 } from "@directus/sdk";
 
-export async function getCSAMemberships(): Promise<csaMembership[]> {
+export async function getCSAMemberships(){
   const directus = await useDirectus();
 
-  const memberships: csaMembership[] = await directus.request(
+  const csaMemberships = await directus.request(
     readItems("csa_membership"),
   );
 
-  return memberships;
+  return csaMemberships;
 }
 
 export async function getCSAMembershipsOfCurrentUser(): Promise<
@@ -25,7 +25,7 @@ export async function getCSAMembershipsOfCurrentUser(): Promise<
   const user = await directus.request(readMe({ fields: ["*"] }));
 
   const memberships: csaMembership[] = await directus.request(
-    readItems("csa_membership", { filter: { csa_membership_of: user.id } }),
+    readItems("csa_membership", { filter: { csa_membership_of: {_eq: user.id} } }),
   );
 
   return memberships;

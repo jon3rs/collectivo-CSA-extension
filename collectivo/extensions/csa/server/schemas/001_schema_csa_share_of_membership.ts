@@ -13,6 +13,9 @@ schema.collections = [
     meta: {
       display_template:
         "{{of_share_size.csa_share_size_name}} {{of_share_size.of_type.csa_share_type_name}}",
+        group: "collectivo_csa_extension",
+        color: "#FF8962",
+        icon: "pie_chart",
     },
   },
 ];

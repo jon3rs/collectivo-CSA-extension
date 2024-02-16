@@ -34,6 +34,6 @@ async function deleteMembership(id: number) {
 
 <style scoped lang="scss">
 .container {
-  @apply my-5 rounded-xl bg-white shadow-sidebar px-3 py-5 flex;
+  @apply my-5 rounded-xl bg-white shadow-sidebar px-3 py-5 flex w-full;
 }
 </style>
