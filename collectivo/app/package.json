@@ -15,6 +15,7 @@
   "dependencies": {
     "@collectivo/collectivo": "workspace:*",
     "@collectivo/memberships": "workspace:*",
+    "@collectivo/collectivo-csa": "workspace:*",
     "@collectivo/payments": "workspace:*"
   },
   "devDependencies": {
