@@ -55,8 +55,8 @@ importers:
   collectivo/collectivo:
     dependencies:
       '@directus/sdk':
-        specifier: ^15.0.0
-        version: 15.0.1
+        specifier: ^15.0.3
+        version: 15.0.3
       '@keycloak/keycloak-admin-client':
         specifier: ^23.0.6
         version: 23.0.6
@@ -719,15 +719,15 @@ packages:
       kuler: 2.0.0
     dev: false
 
-  /@directus/sdk@15.0.1:
-    resolution: {integrity: sha512-NuP+S2SZ23gmcSNnHiX7LxlUxkdIjX0mV3kFKqTdU07epj4OJNHk7ZXfSV2y67fnQjFrb7apTHe2LdWnU8Y6vQ==}
+  /@directus/sdk@15.0.3:
+    resolution: {integrity: sha512-Z6n1YaXSMSQuYH6ENG1W4lcpyPgfwRzBpEJOXeknAnJlneLeV/+iNtCB8WxjnH8D73Sv72peRLKMQtr/SZDz7Q==}
     engines: {node: '>=18.0.0'}
     dependencies:
-      '@directus/system-data': 1.0.0
+      '@directus/system-data': 1.0.1
     dev: false
 
-  /@directus/system-data@1.0.0:
-    resolution: {integrity: sha512-AKzYkLg39phx9AysQhcf7AmIGq1D/PIkor5B8Y5NB8R+jq+jkH1PBtg/l5Ev4hfsidpNBi5DmpuFy/xmQEYhHQ==}
+  /@directus/system-data@1.0.1:
+    resolution: {integrity: sha512-sm2gO9SUcRle5rCsmS4qby2K8OfvewnU9/Iao7brGyexLjXDrvfxBB2danNWVLw1qE+UrLX/R+caVrxQ4ZaMkw==}
     dev: false
 
   /@egoist/tailwindcss-icons@1.7.4(tailwindcss@3.4.1):
@@ -919,7 +919,6 @@ packages:
 
   /@esbuild/linux-loong64@0.19.10:
     resolution: {integrity: sha512-lo3I9k+mbEKoxtoIbM0yC/MZ1i2wM0cIeOejlVdZ3D86LAcFXFRdeuZmh91QJvUTW51bOK5W2BznGNIl4+mDaA==}
-    engines: {node: '>=12'}
     cpu: [loong64]
     os: [linux]
     requiresBuild: true
@@ -3623,7 +3622,6 @@ packages:
 
   /@vue/compiler-sfc@3.3.13:
     resolution: {integrity: sha512-DQVmHEy/EKIgggvnGRLx21hSqnr1smUS9Aq8tfxiiot8UR0/pXKHN9k78/qQ7etyQTFj5em5nruODON7dBeumw==}
-    dependencies:
       '@babel/parser': 7.23.9
       '@vue/compiler-core': 3.3.13
       '@vue/compiler-dom': 3.3.13
@@ -10173,7 +10171,6 @@ packages:
 
   /winston-transport@4.6.0:
     resolution: {integrity: sha512-wbBA9PbPAHxKiygo7ub7BYRiKxms0tpfU2ljtWzb3SjRjv5yl6Ozuy/TkXf00HTAt+Uylo3gSkNwzc4ME0wiIg==}
-    engines: {node: '>= 12.0.0'}
     dependencies:
       logform: 2.6.0
       readable-stream: 3.6.2
