@@ -31,10 +31,10 @@ export async function getDeliveryCycleActualDeliveries(
   limit = 10,
   offset = 0
 ) {
-  const additionalDeliveries: csaDeliveryCycleException[] =
+  let additionalDeliveries: csaDeliveryCycleException[] =
     await getAdditionalDeliveryExceptionsOfDeliveryCycle(deliveryCycle.id);
 
-  const additionalDeliveriesCopy = [...additionalDeliveries];
+  let additionalDeliveriesCopy = [...additionalDeliveries];
 
   const postponedDeliveries: csaDeliveryCycleException[] =
     await getPostponedDeliveryExceptionsOfDeliveryCycle(deliveryCycle.id);
@@ -46,6 +46,8 @@ export async function getDeliveryCycleActualDeliveries(
     ...postponedDeliveries,
     ...cancelledDeliveries,
   ];
+
+  let cancelledAndPostponedDeliveriesCopy = [...cancelledAndPostponedDeliveries];
 
   // todo: outsource the whole firstDateCalculation into a separate function
   let firstDeliveryDate = new Date(deliveryCycle.date_of_first_delivery);
@@ -61,81 +63,45 @@ export async function getDeliveryCycleActualDeliveries(
     );
   }
 
-  if (offset > 0) {
-    let scheduledFirstDelivery = calculateAdjacentDelivery(
-      firstDeliveryDate,
-      offset * limit, 
-      deliveryCycle
-    );
-
-    console.log("scheduledFirstDelivery for: ", offset*limit, "first", scheduledFirstDelivery);
-    let deliveriesToSubtract = 0;
-    const pastDeliveries: csaDeliveryCycleException[] = [];
-    const remainingAdditionalDeliveries: csaDeliveryCycleException[] = [];
-
-    additionalDeliveries.forEach((exception: csaDeliveryCycleException) => {
-      if (new Date(exception.original_delivery_date) < scheduledFirstDelivery) {
-        pastDeliveries.push(exception);
-        deliveriesToSubtract++;
-      }
-    });
-
-    pastDeliveries.forEach((exception: csaDeliveryCycleException) => {
-      
-    });
-    /* for(let i = (pastDeliveries.length-1); i >= 0; i--){
-      console.log("dates between ", calculateAdjacentDelivery(scheduledFirstDelivery, -1, deliveryCycle).toDateString(), " and ", scheduledFirstDelivery.toDateString());
-
-      if(pastDeliveries[i].original_delivery_date < calculateAdjacentDelivery(scheduledFirstDelivery, -1, deliveryCycle)){
-        break;
-      }else{
-        remainingAdditionalDeliveries.push(pastDeliveries[i])
-      }
-    } */
-
-    console.log("pastDeliveries: ", pastDeliveries);
-    console.log("remainingAdditionalDeliveries: ", remainingAdditionalDeliveries);
-
-    firstDeliveryDate = new Date(
-      calculateAdjacentDelivery(
-        firstDeliveryDate,
-        offset * limit - deliveriesToSubtract,// - remainingAdditionalDeliveries.length, //+ deliveriesNotYetDisplayed / dragged along? /remaining additionals
-        deliveryCycle
-      )
-    );
-  }
-
   const deliveryCycleExceptions =
     await getCSADeliveryCycleExceptionsOfDeliveryCycleByID(deliveryCycle.id);
 
   let currentDate = firstDeliveryDate;
+
+  if (offset > 0) {
+    currentDate = calculateAdjacentDelivery(
+      firstDeliveryDate,
+      offset * limit,
+      deliveryCycle
+    );
+  }
   //date has to react to offset
   let counter = 0;
-  const actualDeliveryDates: (Date | csaDeliveryCycleException)[] = [];
+  let actualDeliveryDates: (Date | csaDeliveryCycleException)[] = [];
 
   while (
-    actualDeliveryDates.length < limit &&
+    counter < limit &&
     (!deliveryCycle.date_of_last_delivery ||
       currentDate <= new Date(deliveryCycle.date_of_last_delivery))
   ) {
     //calculate additional offset when offset > 0 somewhere here (how many additional deliveries have there been before -> subtract those from firstDeliveryDate)
     //check if there are any additional deliveries before the very first delivery date
     if (offset == 0 && actualDeliveryDates.length == 0) {
-      additionalDeliveriesCopy.forEach((exception: csaDeliveryCycleException) => {
-        if (new Date(exception.original_delivery_date) < currentDate) {
-          if(actualDeliveryDates.length < limit){
+      additionalDeliveriesCopy.forEach(
+        (exception: csaDeliveryCycleException) => {
+          if (new Date(exception.original_delivery_date) < currentDate) {
             actualDeliveryDates.push(exception);
 
-            additionalDeliveries.splice(
-              additionalDeliveries.indexOf(exception),
-              1
+            additionalDeliveries = additionalDeliveries.filter(
+              exception => !actualDeliveryDates.includes(exception)
             );
           }
-          
         }
-      });
+      );
+
+      additionalDeliveriesCopy = additionalDeliveries;
       //the deliveries that would be fetched when actualDeliveryDates.length == 0 are already displayed on the site
-    } else if ( actualDeliveryDates.length > 0){
+    } else {
       const lastDeliveryDate = calculateAdjacentDelivery(
         currentDate,
         -1,
@@ -144,64 +110,76 @@ export async function getDeliveryCycleActualDeliveries(
       //console.log("vorherige Lieferung", lastDeliveryDate, currentDate)
       //auch hier könnte limit gesprengt werden
 
-      additionalDeliveriesCopy.forEach((exception: csaDeliveryCycleException) => {
-        if (
-          new Date(exception.original_delivery_date) < new Date(currentDate) &&
-          new Date(exception.original_delivery_date) >
-            new Date(lastDeliveryDate)
-        ) {
-          if(actualDeliveryDates.length < limit){
+      additionalDeliveriesCopy.forEach(
+        (exception: csaDeliveryCycleException) => {
+          if(new Date(exception.original_delivery_date) <
+          new Date(lastDeliveryDate)){
+            additionalDeliveries.splice(additionalDeliveries.indexOf(exception), 1);
+          } else if (
+            new Date(exception.original_delivery_date) <
+              new Date(currentDate)
+          ) {
             actualDeliveryDates.push(exception);
-  
-            additionalDeliveries.splice(
-              additionalDeliveries.indexOf(exception),
-              1
-            );
-  
+
+            
+      
           }
           
         }
-      });
-    }
-
-    if (actualDeliveryDates.length < limit) {
-      let objectToPush: Date | csaDeliveryCycleException = currentDate;
-
-      cancelledAndPostponedDeliveries.forEach(
-        (exception: csaDeliveryCycleException) => {
-          if (
-            new Date(exception.original_delivery_date)
-              .toISOString()
-              .slice(0, 10) == currentDate.toISOString().slice(0, 10)
-          ) {
-            objectToPush = exception;
-
-            cancelledAndPostponedDeliveries.splice(
-              cancelledAndPostponedDeliveries.indexOf(exception),
-              1
-            );
-          }
-        }
       );
 
-      if (objectToPush instanceof Date) {
-        objectToPush = calculateAdjacentDelivery(currentDate, 0, deliveryCycle);
-      }
-
-      counter++;
-      actualDeliveryDates.push(objectToPush);
-    } else {
-      break;
+      additionalDeliveries = additionalDeliveries.filter(
+        exception => !actualDeliveryDates.includes(exception)
+      );
+     
+      console.log("additionals + copy")
+      console.log(additionalDeliveries)
+      console.log(additionalDeliveriesCopy)
+      additionalDeliveriesCopy = additionalDeliveries;
     }
+
+    if (deliveryCycle.date_of_last_delivery && calculateAdjacentDelivery(currentDate, 1, deliveryCycle) > new Date(deliveryCycle.date_of_last_delivery)) {
+      console.log("remainings: ")
+      console.log(additionalDeliveriesCopy)
+      actualDeliveryDates = actualDeliveryDates.concat(additionalDeliveriesCopy);
+    }
+
+    let objectToPush: Date | csaDeliveryCycleException = currentDate;
+
+    cancelledAndPostponedDeliveriesCopy.forEach(
+      (exception: csaDeliveryCycleException) => {
+        if (
+          new Date(exception.original_delivery_date)
+            .toISOString()
+            .slice(0, 10) == currentDate.toISOString().slice(0, 10)
+        ) {
+          objectToPush = exception;
+
+          cancelledAndPostponedDeliveries.filter(
+            exception => !actualDeliveryDates.includes(exception)
+          );
+        }
+
+        
+      }
+    );
+
+    cancelledAndPostponedDeliveriesCopy = cancelledAndPostponedDeliveries;
+
+    counter++;
+    actualDeliveryDates.push(objectToPush);
 
     if (deliveryCycle.repeats_on !== null) {
       nextDeliveryDate = calculateAdjacentDelivery(
         firstDeliveryDate,
-        counter,
+        counter+(offset*limit),
         deliveryCycle
       );
 
       currentDate = new Date(nextDeliveryDate);
+    }else{
+      // @to do: look for additionals after
+      break;
     }
   }
 
@@ -324,7 +302,6 @@ function calculateLastOfMonth(
   //check if this returns the correct month
 
   while (nthOfMonth.getMonth() === lastOfMonth.getMonth()) {
-
     if (nthOfMonth.getDay() === weekday) {
       break;
     }
