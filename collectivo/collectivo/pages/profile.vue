@@ -15,6 +15,7 @@ const profileMenu = useCollectivoMenus().value.profile;
 // Get form data
 async function getProfile() {
   await user.value.load();
+  console.log(user.value.load());
 }
 
 getProfile();
@@ -52,5 +53,8 @@ async function saveProfile(data: CollectivoUser) {
       :submit="saveProfile"
       submit-label="Save"
     />
+    <pre>
+      {{ user.data }}
+    </pre>
   </CollectivoContainer>
 </template>

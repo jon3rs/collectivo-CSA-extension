@@ -9,9 +9,9 @@ export default defineNuxtPlugin(() => {
       order: 100,
     },
     {
-      label: "Lieferungen",
-      icon: "i-system-uicons-cubes",
-      to: "/deliveries",
+      label: "Lieferzyklen",
+      icon: "i-system-uicons-rocket",
+      to: "/delivery-cycles",
       order: 100,
     },
   );
