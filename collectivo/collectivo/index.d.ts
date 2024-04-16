@@ -31,13 +31,6 @@ declare global {
     tags_users: CollectivoUser[] | number[];
   }
 
-  interface CollectivoTileButton {
-    id: number;
-    tiles_label: string;
-    tiles_path: string;
-    tiles_is_external: boolean;
-  }
-
   interface CollectivoTile {
     id: number;
     sort: number;
@@ -46,6 +39,14 @@ declare global {
     tiles_status: "published" | "draft" | "archived";
     tiles_buttons: CollectivoTileButton[];
     tiles_color: string;
+    tiles_component: string;
+  }
+
+  interface CollectivoTileButton {
+    id: number;
+    tiles_label: string;
+    tiles_path: string;
+    tiles_is_external: boolean;
   }
 
   interface CollectivoExtension {
@@ -67,8 +68,9 @@ declare global {
   // Layout
   interface CollectivoMenus {
     main: CollectivoMenuItem[];
-    public: CollectivoMenuItem[];
+    main_public: CollectivoMenuItem[];
     profile: CollectivoMenuItem[];
+    profile_public: CollectivoMenuItem[];
   }
 
   interface CollectivoMenuItem {
@@ -101,7 +103,7 @@ declare global {
 
   interface CollectivoFormFieldBase {
     order: number;
-    width?: "full" | "half" | "xl" | "lg" | "md" | "sm" | "xs";
+    width?: "lg" | "md" | "sm";
     conditions?: FormCondition[];
     _visible?: Ref<boolean>;
   }
