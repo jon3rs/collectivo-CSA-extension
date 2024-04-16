@@ -11,30 +11,6 @@ const deliveryCycles: csaDeliveryCycle[] = await getCSADeliveryCycles();
 const fieldsOfDeliveryCycles = await getFieldsByCollection("csa_delivery_cycle");
 const fieldsOfExceptions = await getFieldsByCollection("csa_delivery_cycle_exception");
 const relations = await getRelations();
-
-onMounted(() => {
-  console.log(deliveryCycles.length);
-  console.log("fields of delivery cycles: ",fieldsOfDeliveryCycles);
-  console.log("fields of delivery cycles exceptions: ",fieldsOfExceptions);
-  console.log("relations: ",relations);
-  /*  deliveryCycles.forEach((deliveryCycle) => {
-    if (
-      deliveryCycle.date_of_last_delivery !== null &&
-      deliveryCycle.interval_of_delivery_cycle !== null
-    ) {
-      const deliveriesPerCycle = Math.floor(
-        (new Date(deliveryCycle.date_of_last_delivery) -
-          new Date(deliveryCycle.date_of_first_delivery)) /
-          1000 /
-          60 /
-          60 /
-          24 /
-          deliveryCycle.interval_of_delivery_cycle
-      );
-      console.log(deliveriesPerCycle);
-    }
-  }); */
-});
 </script>
 
 <template>

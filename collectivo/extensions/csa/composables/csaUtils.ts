@@ -48,14 +48,14 @@ export async function getDeliveryCycleActualDeliveries(
   ];
 
   let cancelledAndPostponedDeliveriesCopy = [...cancelledAndPostponedDeliveries];
-
+  let addRemainingAdditionals = false;
   // todo: outsource the whole firstDateCalculation into a separate function
   let firstDeliveryDate = new Date(deliveryCycle.date_of_first_delivery);
   let nextDeliveryDate: Date;
 
   if (
     new Date(deliveryCycle.date_of_first_delivery).getDay() !==
-    deliveryCycle.repeats_on
+    deliveryCycle.repeats_on && deliveryCycle.repeats_on
   ) {
     firstDeliveryDate.setDate(
       firstDeliveryDate.getDate() +
@@ -75,7 +75,7 @@ export async function getDeliveryCycleActualDeliveries(
       deliveryCycle
     );
   }
-  //date has to react to offset
+  
   let counter = 0;
   let actualDeliveryDates: (Date | csaDeliveryCycleException)[] = [];
 
@@ -84,7 +84,6 @@ export async function getDeliveryCycleActualDeliveries(
     (!deliveryCycle.date_of_last_delivery ||
       currentDate <= new Date(deliveryCycle.date_of_last_delivery))
   ) {
-    //calculate additional offset when offset > 0 somewhere here (how many additional deliveries have there been before -> subtract those from firstDeliveryDate)
     //check if there are any additional deliveries before the very first delivery date
     if (offset == 0 && actualDeliveryDates.length == 0) {
       additionalDeliveriesCopy.forEach(
@@ -107,8 +106,6 @@ export async function getDeliveryCycleActualDeliveries(
         -1,
         deliveryCycle
       );
-      //console.log("vorherige Lieferung", lastDeliveryDate, currentDate)
-      //auch hier könnte limit gesprengt werden
 
       additionalDeliveriesCopy.forEach(
         (exception: csaDeliveryCycleException) => {
@@ -131,17 +128,12 @@ export async function getDeliveryCycleActualDeliveries(
       additionalDeliveries = additionalDeliveries.filter(
         exception => !actualDeliveryDates.includes(exception)
       );
-     
-      console.log("additionals + copy")
-      console.log(additionalDeliveries)
-      console.log(additionalDeliveriesCopy)
+
       additionalDeliveriesCopy = additionalDeliveries;
     }
 
     if (deliveryCycle.date_of_last_delivery && calculateAdjacentDelivery(currentDate, 1, deliveryCycle) > new Date(deliveryCycle.date_of_last_delivery)) {
-      console.log("remainings: ")
-      console.log(additionalDeliveriesCopy)
-      actualDeliveryDates = actualDeliveryDates.concat(additionalDeliveriesCopy);
+      addRemainingAdditionals = true;
     }
 
     let objectToPush: Date | csaDeliveryCycleException = currentDate;
@@ -168,6 +160,10 @@ export async function getDeliveryCycleActualDeliveries(
 
     counter++;
     actualDeliveryDates.push(objectToPush);
+    
+    if(addRemainingAdditionals){
+      actualDeliveryDates = actualDeliveryDates.concat(additionalDeliveriesCopy);
+    }
 
     if (deliveryCycle.repeats_on !== null) {
       nextDeliveryDate = calculateAdjacentDelivery(
@@ -186,7 +182,7 @@ export async function getDeliveryCycleActualDeliveries(
   return actualDeliveryDates;
 }
 
-function calculateAdjacentDelivery(
+export function calculateAdjacentDelivery(
   date: Date,
   offsetAmount: number,
   deliveryCycle: csaDeliveryCycle

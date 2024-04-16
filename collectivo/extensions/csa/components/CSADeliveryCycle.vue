@@ -13,22 +13,22 @@ const props = defineProps({
 
 const deliveryListExpanded = ref(false);
 const currentPage = ref(0);
+const maxRegularDeliveriesToDisplay = 10;
+const deliveriesToDisplay: Ref<(Date | csaDeliveryCycleException)[]> = ref([]);
+const firstDate: Ref<Date> = ref(new Date());
+const lastDate: Ref<Date> = ref(new Date());
 /* const deliveryExceptions = await getCSADeliveryCycleExceptionsOfDeliveryCycleByID(
   props.deliveryCycle.id
 ); */
 
 watch(currentPage, async (newPage) => {
-
-  deliveriesToDisplay.value = await getDeliveryCycleActualDeliveries(
-    props.deliveryCycle,
-    10,
-    newPage
-  );
-  
+  await updateDeliveriesToDisplay()
+  setCurrentFirstAndLastDate();
 });
 
 onMounted(async () => {
-  deliveriesToDisplay.value = await getDeliveryCycleActualDeliveries( props.deliveryCycle, 10, currentPage.value)
+  await updateDeliveriesToDisplay()
+  setCurrentFirstAndLastDate();
 });
 
 const dateOptions = {
@@ -49,11 +49,37 @@ const weekday = [
   "Samstag",
 ];
 
+async function updateDeliveriesToDisplay(){
+  deliveriesToDisplay.value = await getDeliveryCycleActualDeliveries(
+    props.deliveryCycle,
+    10,
+    currentPage.value
+  );
+}
+
+function setCurrentFirstAndLastDate() {
+  if (deliveriesToDisplay.value[0] instanceof Date) {
+    firstDate.value = deliveriesToDisplay.value[0];
+  } else {
+    firstDate.value = deliveriesToDisplay.value[0].original_delivery_date;
+  }
+  //had to declare a new variable to avoid type error
+
+  const lastEntry =
+    deliveriesToDisplay.value[deliveriesToDisplay.value.length - 1];
+
+  if (lastEntry instanceof Date) {
+    lastDate.value = lastEntry;
+  } else {
+    lastDate.value = lastEntry.original_delivery_date;
+  }
+}
+
 function createIntervalDescription() {
   let day: string = "";
 
   if (
-    props.deliveryCycle.repeats_on != null  &&
+    props.deliveryCycle.repeats_on != null &&
     props.deliveryCycle.interval_of_delivery_cycle
   ) {
     day = weekday[props.deliveryCycle.repeats_on];
@@ -75,8 +101,6 @@ function createIntervalDescription() {
   }
 }
 
-const deliveriesToDisplay = ref( );
-
 function toggleDeliveries() {
   //const currentState = deliveryCycle.extended;
   deliveryListExpanded.value = !deliveryListExpanded.value;
@@ -89,7 +113,11 @@ function toggleDeliveries() {
       <div class="flex justify-between mb-5">
         <h2 class="pr-3 break-all">
           {{ deliveryCycle.name_of_delivery_cycle }}
-          {{ deliveryCycle.interval_of_delivery_cycle ? deliveryCycle.interval_of_delivery_cycle : "" }}
+          {{
+            deliveryCycle.interval_of_delivery_cycle
+              ? deliveryCycle.interval_of_delivery_cycle
+              : ""
+          }}
           {{ deliveryCycle.repeats_on ? deliveryCycle.repeats_on : "" }}
         </h2>
         <NuxtLink
@@ -162,9 +190,7 @@ function toggleDeliveries() {
           </p>
         </div>
       </div>
-      <div
-        v-if="deliveryCycle.type_of_delivery_cycle !== 'single'"
-      >
+      <div v-if="deliveryCycle.type_of_delivery_cycle !== 'single'">
         <div class="flex justify-between mb-3">
           <UButton
             class="toggle-deliveries-button underline"
@@ -176,7 +202,41 @@ function toggleDeliveries() {
           >
             Lieferungen anzeigen</UButton
           >
-          <div class="pagination"> <UButton @click="()=>{currentPage--}" variant="link" :disabled="currentPage == 0" icon="i-heroicons-chevron-left-solid"/><UButton @click="currentPage++" variant="link" icon="i-heroicons-chevron-right-solid"/></div>
+          <div v-if="deliveryListExpanded" class="flex">
+            <div
+              class="rounded-full px-3 w-fit p-2 text-sm bg-slate-100 text-slate-800"
+            >
+              Zeitraum:
+              {{ formatDate(firstDate) }}
+              bis
+              {{ formatDate(lastDate) }}
+            </div>
+            <div class="pagination">
+              <UButton
+                @click="
+                  () => {
+                    currentPage--;
+                  }
+                "
+                variant="link"
+                :disabled="currentPage == 0"
+                icon="i-heroicons-chevron-left-solid"
+              /><UButton
+                @click="currentPage++"
+                variant="link"
+                :disabled="
+                  deliveryCycle.type_of_delivery_cycle == 'single' ||
+                  (deliveryCycle.date_of_last_delivery &&
+                    calculateAdjacentDelivery(
+                      new Date(deliveryCycle.date_of_first_delivery),
+                      (currentPage + 1) * maxRegularDeliveriesToDisplay,
+                      deliveryCycle
+                    ) > new Date(deliveryCycle.date_of_last_delivery))
+                "
+                icon="i-heroicons-chevron-right-solid"
+              />
+            </div>
+          </div>
         </div>
         <div
           v-if="
@@ -187,7 +247,11 @@ function toggleDeliveries() {
             <!-- <p>
               Delivery {{ index + 1 }} on <span>{{ delivery }}</span>
             </p> -->
-            <CSADeliveryListItem :delivery="delivery" :index="index" :deliveryCycleId="deliveryCycle.id" />
+            <CSADeliveryListItem
+              :delivery="delivery"
+              :index="index"
+              :deliveryCycleId="deliveryCycle.id"
+            />
           </div>
         </div>
       </div>

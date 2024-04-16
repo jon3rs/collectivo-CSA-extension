@@ -29,7 +29,6 @@ export async function getCSADeliveryCycleExceptionsOfDeliveryCycleByID(id: numbe
 
 export async function getAdditionalDeliveryExceptionsOfDeliveryCycle(deliveryCycleID: number): Promise<csaDeliveryCycleException[]> {
   const directus = await useDirectus();
-  console.log("hi from exception catching");
 
   const deliveryCycleExceptions: csaDeliveryCycleException[] = await directus.request(
     readItems("csa_delivery_cycle_exception", {
