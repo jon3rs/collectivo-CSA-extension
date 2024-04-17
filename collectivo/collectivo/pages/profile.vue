@@ -7,7 +7,6 @@ setCollectivoTitle("Profile");
 const toast = useToast();
 const { t } = useI18n();
 const user = useCollectivoUser();
-const profileMenu = useCollectivoMenus().value.profile;
 
 // Sort profile.inputs by order
 // profile.value.inputs.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
@@ -27,7 +26,7 @@ async function saveProfile(data: CollectivoUser) {
 
     toast.add({
       title: t("Profile updated"),
-      icon: "i-mi-circle-check",
+      icon: "i-heroicons-check-circle",
       timeout: 10000,
     });
   } catch (e) {
@@ -35,7 +34,7 @@ async function saveProfile(data: CollectivoUser) {
 
     toast.add({
       title: t("There was an error"),
-      icon: "i-mi-warning",
+      icon: "i-heroicons-exclamation-triangle",
       color: "red",
       timeout: 0,
     });
@@ -44,7 +43,7 @@ async function saveProfile(data: CollectivoUser) {
 </script>
 
 <template>
-  <CollectivoMenuTabs :items="profileMenu" />
+  <!-- <CollectivoMenuTabs :items="profileMenu" /> -->
   <CollectivoContainer>
     <CollectivoFormBuilder
       v-if="user.data"

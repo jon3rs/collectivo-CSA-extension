@@ -23,34 +23,29 @@ async function filterItem(item: CollectivoMenuItem) {
 
 <template>
   <div v-if="visible">
-    <!-- IF item.to is function -->
     <div v-if="item.click">
-      <a class="item cursor-pointer" @click="item.click()">
-        <span class="item__icon">
-          <slot name="icon">
-            <UIcon v-if="item.icon" :name="item.icon" class="link-icon" />
-          </slot>
-        </span>
+      <a class="item" @click="item.click()">
+        <slot name="icon">
+          <UIcon v-if="item.icon" :name="item.icon" class="item__icon" />
+        </slot>
         <span class="item__title">{{ t(item.label) }}</span>
       </a>
     </div>
     <div v-else-if="item.external">
       <a :href="item.to" :target="item.target ?? '_blank'" class="item">
-        <span class="item__icon">
-          <slot name="icon">
-            <UIcon v-if="item.icon" :name="item.icon" class="link-icon" />
-          </slot>
-        </span>
+        <slot name="icon">
+          <UIcon v-if="item.icon" :name="item.icon" class="item__icon" />
+        </slot>
+
         <span class="item__title">{{ t(item.label) }}</span>
       </a>
     </div>
     <div v-else>
       <NuxtLink :to="item.to" class="item">
-        <span class="item__icon">
-          <slot name="icon">
-            <UIcon v-if="item.icon" :name="item.icon" class="link-icon"
-          /></slot>
-        </span>
+        <slot name="icon">
+          <UIcon v-if="item.icon" :name="item.icon" class="item__icon" />
+        </slot>
+
         <span class="item__title">{{ t(item.label) }}</span>
       </NuxtLink>
     </div>
@@ -59,56 +54,37 @@ async function filterItem(item: CollectivoMenuItem) {
 
 <style lang="scss">
 .item {
-  @apply flex flex-col items-center p-3 mb-1 rounded-xl transition-all;
+  // Use flex-row to align icon and title horizontally
+  @apply flex flex-col gap-2 items-center px-3 py-4 mb-2 rounded-xl transition-all cursor-pointer;
   &__icon {
-    @apply block mb-1;
+    @apply h-6 w-6 mb-0;
   }
 
   &__title {
-    @apply md:text-xs lg:text-sm font-semibold;
+    @apply text-sm font-semibold;
     letter-spacing: 0.28px;
   }
 
-  &:hover {
-    @apply bg-primary-50;
-    .item__title {
-      @apply text-primary-900;
-    }
-
-    .item__icon {
-      .link-icon {
-        @apply text-primary-900;
-      }
-    }
-  }
-
+  &:hover,
   &.router-link-exact-active {
-    @apply bg-primary-50;
-    .item__title {
-      @apply text-primary-900;
-    }
-
-    .item__icon {
-      .link-icon {
-        @apply text-primary-900;
-      }
-    }
+    @apply bg-primary-50 text-primary-900;
   }
-}
-
-.link-icon {
-  @apply h-7 w-7 md:h-6 lg:h-[30px] md:w-6 lg:w-[30px];
 }
 
 .mobile-menu-item {
   @apply p-0 mb-0;
-  .item__icon {
-    @apply mb-[7px];
-  }
 
-  .item__title {
-    @apply text-xs;
-    letter-spacing: 0.24px;
+  .item {
+    @apply pt-2.5 pb-2 px-2.5 mb-0 mx-0 min-w-16;
+
+    &__icon {
+      @apply mb-1;
+    }
+
+    &__title {
+      @apply text-xs;
+      letter-spacing: 0.24px;
+    }
   }
 
   &.router-link-exact-active {

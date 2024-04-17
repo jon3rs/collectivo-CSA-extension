@@ -6,19 +6,13 @@ export default defineNuxtPlugin(() => {
   const items: CollectivoMenuItem[] = [
     {
       label: "Home",
-      icon: "i-system-uicons-grid",
+      icon: "i-heroicons-home",
       to: "/",
       order: 0,
     },
     {
-      label: "Profile",
-      icon: "i-system-uicons-user-male-circle",
-      to: "/profile",
-      order: 0,
-    },
-    {
       label: "Studio",
-      icon: "i-system-uicons-cubes",
+      icon: "i-heroicons-chart-bar-square",
       to: runtimeConfig.public.directusUrl,
       external: true,
       // hideOnMobile: true,
@@ -30,10 +24,10 @@ export default defineNuxtPlugin(() => {
     },
   ];
 
-  const publicItems: CollectivoMenuItem[] = [
+  const profilePublicItems: CollectivoMenuItem[] = [
     {
       label: "Login",
-      icon: "i-system-uicons-enter",
+      icon: "i-heroicons-arrow-right-on-rectangle-solid",
       click: user.value.login,
       order: 100,
       filter: (_item) => {
@@ -44,15 +38,25 @@ export default defineNuxtPlugin(() => {
 
   const profileItems: CollectivoMenuItem[] = [
     {
-      label: "General",
-      to: "/profile",
+      label: "Profile",
+      icon: "i-heroicons-user-circle",
+      to: "/profile/",
       order: 1,
+    },
+    {
+      label: "Logout",
+      icon: "i-heroicons-arrow-left-on-rectangle-solid",
+      click: () => {
+        user.value.logout();
+      },
+      order: 1000,
     },
   ];
 
   menu.value.main.push(...items);
-  menu.value.public.push(...publicItems);
+
   menu.value.profile.push(...profileItems);
+  menu.value.profile_public.push(...profilePublicItems);
 
   const profileInputs: CollectivoFormField[] = [
     {

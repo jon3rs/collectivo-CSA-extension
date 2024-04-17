@@ -113,12 +113,6 @@ function toggleDeliveries() {
       <div class="flex justify-between mb-5">
         <h2 class="pr-3 break-all">
           {{ deliveryCycle.name_of_delivery_cycle }}
-          {{
-            deliveryCycle.interval_of_delivery_cycle
-              ? deliveryCycle.interval_of_delivery_cycle
-              : ""
-          }}
-          {{ deliveryCycle.repeats_on ? deliveryCycle.repeats_on : "" }}
         </h2>
         <NuxtLink
           :href="
