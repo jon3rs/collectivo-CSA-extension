@@ -17,7 +17,7 @@ onBeforeMount(() => {
 
 const emit = defineEmits(["refreshDepot"]);
 
-const share = ref<csaShareOfMembership>(
+const share: Ref<csaShareOfMembership> = ref<csaShareOfMembership>(
   await getCSAShareOfMemberShipById(props.csaShare)
 ); //ref<csaShareOfMembership>();
 
@@ -28,9 +28,9 @@ const refreshShare = async () => {
 
 //await getCSAShareOfMemberShipById(props.csaShare);
 console.log("share: ", share);
-const shareSize = ref({});
-const shareType = ref({});
-const depot = ref({});
+const shareSize: Ref<csaShareSize> = ref<csaShareSize>(await getCSAShareSizeById(share.value.of_share_size));
+const shareType: Ref<csaShareType> = ref<csaShareType>(await getCSAShareTypeById(shareSize.value.of_type));
+const depot: Ref<csaDepot|undefined> = ref(undefined);
 
 const refreshDepot = async () => {
   console.log("refreshing depot");
@@ -42,7 +42,7 @@ const refreshDepot = async () => {
 };
 
 const depotForm = ref(false);
-const csaDepots = await getCSADepots();
+const csaDepots: csaDepot[] = await getCSADepots();
 const checkedDepot = ref("");
 
 function toggleDepotForm() {
@@ -76,7 +76,7 @@ async function updateDepot(newDepot: number) {
       </div>
       <div class="mt-2 transition-all">
         <span class="inline-block font-bold mr-2">Default Depot:</span>
-        <span>{{ depot.csa_depot_name }}</span>
+        <span v-if="depot">{{ depot.csa_depot_name }}</span>
         <UButton @click="toggleDepotForm()">switch default depot</UButton>
         <form
           v-if="depotForm == true"

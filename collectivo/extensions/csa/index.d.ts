@@ -35,6 +35,7 @@ declare global {
   interface csaShareSize {
     id: number;
     csa_share_size_name: string;
+    of_type: number;
   }
 
   interface csaShareType {

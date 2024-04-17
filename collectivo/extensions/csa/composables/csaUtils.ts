@@ -11,20 +11,42 @@ export function formatDate(date: Date): string {
   return new Date(date).toLocaleDateString("de-DE", dateOptions);
 }
 
-/* export function calculateDeliveriesAmount(deliveryCycle: csaDeliveryCycle) {
-    const deliveriesPerCycle =
-      (new Date(deliveryCycle.date_of_last_delivery) -
-        new Date(deliveryCycle.date_of_first_delivery)) /
-        1000 /
-        60 /
-        60 /
-        24 /
-        deliveryCycle.interval_of_delivery_cycle +
-      1;
+export function createIntervalDescription(deliveryCycle: csaDeliveryCycle) {
+  let day: string = "";
   
-    const deliveriesPerCycleRounded = Math.floor(deliveriesPerCycle);
-    return deliveriesPerCycleRounded;
-} */
+  const weekday = [
+    "Sonntag",
+    "Montag",
+    "Dienstag",
+    "Mittwoch",
+    "Donnerstag",
+    "Freitag",
+    "Samstag",
+  ];
+
+  if (
+    deliveryCycle.repeats_on != null &&
+    deliveryCycle.interval_of_delivery_cycle
+  ) {
+    day = weekday[deliveryCycle.repeats_on];
+
+    switch (deliveryCycle.interval_of_delivery_cycle) {
+      case "weekly":
+        return `jeden ${day}`;
+      case "biweekly":
+        return `alle zwei Wochen am ${day}`;
+      case "first_of_month":
+        return `jeden ersten ${day} des Monats`;
+      case "second_of_month":
+        return `jeden zweiten ${day} des Monats`;
+      case "third_of_month":
+        return `jeden dritten ${day} des Monats`;
+      case "last_of_month":
+        return `jeden letzten ${day} des Monats`;
+    }
+  }
+}
+
 
 export async function getDeliveryCycleActualDeliveries(
   deliveryCycle: csaDeliveryCycle,

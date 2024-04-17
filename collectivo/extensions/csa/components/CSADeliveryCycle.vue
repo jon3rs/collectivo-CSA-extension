@@ -2,6 +2,7 @@
 import {
   formatDate,
   getDeliveryCycleActualDeliveries,
+  createIntervalDescription
 } from "@/composables/csaUtils";
 
 const props = defineProps({
@@ -39,15 +40,7 @@ const dateOptions = {
 };
 
 //const weekday = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-const weekday = [
-  "Sonntag",
-  "Montag",
-  "Dienstag",
-  "Mittwoch",
-  "Donnerstag",
-  "Freitag",
-  "Samstag",
-];
+
 
 async function updateDeliveriesToDisplay(){
   deliveriesToDisplay.value = await getDeliveryCycleActualDeliveries(
@@ -75,31 +68,7 @@ function setCurrentFirstAndLastDate() {
   }
 }
 
-function createIntervalDescription() {
-  let day: string = "";
 
-  if (
-    props.deliveryCycle.repeats_on != null &&
-    props.deliveryCycle.interval_of_delivery_cycle
-  ) {
-    day = weekday[props.deliveryCycle.repeats_on];
-
-    switch (props.deliveryCycle.interval_of_delivery_cycle) {
-      case "weekly":
-        return `jeden ${day}`;
-      case "biweekly":
-        return `alle zwei Wochen am ${day}`;
-      case "first_of_month":
-        return `jeden ersten ${day} des Monats`;
-      case "second_of_month":
-        return `jeden zweiten ${day} des Monats`;
-      case "third_of_month":
-        return `jeden dritten ${day} des Monats`;
-      case "last_of_month":
-        return `jeden letzten ${day} des Monats`;
-    }
-  }
-}
 
 function toggleDeliveries() {
   //const currentState = deliveryCycle.extended;
@@ -153,7 +122,7 @@ function toggleDeliveries() {
             class="delivery-cycle-icon"
             name="i-heroicons-arrow-path-solid"
           />
-          {{ createIntervalDescription() }}
+          {{ createIntervalDescription(deliveryCycle) }}
         </p>
       </div>
       <div v-else-if="deliveryCycle.type_of_delivery_cycle == 'finite'">
@@ -180,12 +149,12 @@ function toggleDeliveries() {
             />
           </div>
           <p>
-            {{ createIntervalDescription() }}
+            {{ createIntervalDescription(deliveryCycle) }}
           </p>
         </div>
       </div>
       <div v-if="deliveryCycle.type_of_delivery_cycle !== 'single'">
-        <div class="flex justify-between mb-3">
+        <div class="lg:flex justify-between mb-3">
           <UButton
             class="toggle-deliveries-button underline"
             variant="link"
@@ -196,7 +165,7 @@ function toggleDeliveries() {
           >
             Lieferungen anzeigen</UButton
           >
-          <div v-if="deliveryListExpanded" class="flex">
+          <div v-if="deliveryListExpanded" class="md:flex justify-between mt-2 lg:mt-0">
             <div
               class="rounded-full px-3 w-fit p-2 text-sm bg-slate-100 text-slate-800"
             >
@@ -205,18 +174,13 @@ function toggleDeliveries() {
               bis
               {{ formatDate(lastDate) }}
             </div>
-            <div class="pagination">
+            <div class="pagination text-right md:text-left">
               <UButton
-                @click="
-                  () => {
-                    currentPage--;
-                  }
-                "
                 variant="link"
                 :disabled="currentPage == 0"
                 icon="i-heroicons-chevron-left-solid"
+                @click="currentPage--"
               /><UButton
-                @click="currentPage++"
                 variant="link"
                 :disabled="
                   deliveryCycle.type_of_delivery_cycle == 'single' ||
@@ -228,6 +192,7 @@ function toggleDeliveries() {
                     ) > new Date(deliveryCycle.date_of_last_delivery))
                 "
                 icon="i-heroicons-chevron-right-solid"
+                @click="currentPage++"
               />
             </div>
           </div>
