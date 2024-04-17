@@ -123,7 +123,7 @@ function toggleDeliveries() {
           class="edit-button flex items-center justify-center self-start p-2 grow-0 rounded-full bg-primary text-white"
           aria-label="Edit delivery cycle in Studio"
         >
-          <UIcon name="i-mi-edit" />
+          <UIcon name="i-heroicons-pencil-solid" />
         </NuxtLink>
       </div>
       <div

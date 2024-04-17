@@ -4,13 +4,13 @@ export default defineNuxtPlugin(() => {
   menu.value.main.push(
     {
       label: "Meine Anteile",
-      icon: "i-system-uicons-cubes",
+      icon: "i-heroicons-shopping-bag",
       to: "/my-shares",
       order: 100,
     },
     {
       label: "Lieferzyklen",
-      icon: "i-system-uicons-rocket",
+      icon: "i-heroicons-arrow-path",
       to: "/delivery-cycles",
       order: 100,
     },
