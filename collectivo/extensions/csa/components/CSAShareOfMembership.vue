@@ -101,10 +101,10 @@ async function updateDepot(newDepot: number) {
       </div>
     </div>
     <h3>scheduled deliveries for this share:</h3>
-    <CSARecurringShareInstance
+    <!-- <CSARecurringShareInstance
       v-for="shareInstance in share.csa_recurring_share_instance"
       :key="shareInstance"
       :share-instance-id="shareInstance"
-    />
+    /> -->
   </div>
 </template>

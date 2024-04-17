@@ -13,11 +13,7 @@ export default async function examples() {
 
   await directus.request(deleteItems("csa_depot", { limit: 1000 }));
 
-  await directus.request(
-    deleteItems("csa_recurring_share_instance", { limit: 1000 }),
-  );
 
-  await directus.request(deleteItems("csa_delivery", { limit: 1000 }));
   let exampleTypeID = 1;
 
   //create example data for csa_share_type

@@ -31,13 +31,7 @@ async function addShare(id: number, shareSizeId: number, depotId: number) {
   console.log("depotId: ", depotId);
 
   await addCSAShareToMembership(id, shareSizeId, depotId).then(async (res) => {
-    console.log("now creating recurring share instances", res);
-
-    await createRecurringShareInstancesFor(res).then(() => {
-      console.log("created recurring share instances: ", res);
-    });
-
-    console.log("new share: ", res);
+   //
   });
 }
 

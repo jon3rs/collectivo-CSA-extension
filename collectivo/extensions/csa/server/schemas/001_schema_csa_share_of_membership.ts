@@ -89,15 +89,6 @@ schema.fields = [
     },
     type: "alias",
   },
-  {
-    collection: "csa_share_of_membership",
-    field: "csa_recurring_share_instance",
-    type: "alias",
-    meta: {
-      interface: "list-o2m",
-      special: ["o2m"],
-    },
-  },
 ];
 
 schema.relations = [

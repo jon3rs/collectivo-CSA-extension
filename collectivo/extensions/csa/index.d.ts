@@ -3,7 +3,6 @@ declare global {
   interface CollectivoSchema {
     csa_membership: csaMembership[];
     csa_share_of_membership: csaShareOfMembership[];
-    csa_recurring_share_instance: csaRecurringShareInstance[];
     csa_share_size: csaShareSize[];
     csa_share_type: csaShareType[];
     csa_depot: csaDepot[];  
@@ -21,15 +20,6 @@ declare global {
     of_share_size: number;
     default_depot: number;
     of_membership: number;
-    csa_recurring_share_instance: number[] | null;
-  }
-
-  interface csaRecurringShareInstance {
-    id: number;
-    for_delivery: number;
-    for_share_of_membership: number;
-    csa_share_instance_status: boolean;
-    csa_recurring_share_instance_depot: number;
   }
 
   interface csaShareSize {

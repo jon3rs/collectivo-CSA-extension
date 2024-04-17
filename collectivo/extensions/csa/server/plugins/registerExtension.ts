@@ -3,8 +3,6 @@ import s001_test_migration from "../schemas/001_schema_csa_membership_test";
 import s001_csa_share from "../schemas/001_schema_csa_share";
 import s001_csa_share_of_membership from "../schemas/001_schema_csa_share_of_membership";
 import s001_csa_depot from "../schemas/001_schema_csa_depot";
-import s001_csa_recurring_share_instance from "../schemas/001_schema_recurring_csa_share_instance";
-import s001_csa_delivery from "../schemas/001_schema_csa_delivery";
 import s001_schema_csa_collectivo_folder from "../schemas/001_schema_csa_collectivo_folder";
 import s001_csa_delivery_cycle from "../schemas/001_schema_csa_delivery_cycle";
 import s001_csa_delivery_cycle_exceptions from "../schemas/001_schema_csa_delivery_cycle_exception";
@@ -23,8 +21,6 @@ export default defineNitroPlugin(() => {
         s001_csa_share_of_membership,
         s001_csa_share,
         s001_csa_depot,
-        s001_csa_recurring_share_instance,
-        s001_csa_delivery,
         s001_csa_delivery_cycle_exceptions,
         s001_csa_delivery_cycle,
       ]),
