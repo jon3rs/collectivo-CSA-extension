@@ -6,6 +6,7 @@ import s001_csa_depot from "../schemas/001_schema_csa_depot";
 import s001_schema_csa_collectivo_folder from "../schemas/001_schema_csa_collectivo_folder";
 import s001_csa_delivery_cycle from "../schemas/001_schema_csa_delivery_cycle";
 import s001_csa_delivery_cycle_exceptions from "../schemas/001_schema_csa_delivery_cycle_exception";
+import s001_csa_share_type_x_csa_delivery_cycle from "../schemas/001_schema_csa_share_x_csa_delivery_cycle";
 import examples from "../examples/examples";
 
 // Register extension on startup
@@ -23,6 +24,7 @@ export default defineNitroPlugin(() => {
         s001_csa_depot,
         s001_csa_delivery_cycle_exceptions,
         s001_csa_delivery_cycle,
+        s001_csa_share_type_x_csa_delivery_cycle,
       ]),
     ],
     examples: examples,

@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { getCSARecurringShareInstances } from "@/composables/csaUtils";
+import CSADeliveryListItem from "./CSADeliveryListItem.vue";
+
 const props = defineProps({
   csaShare: {
     type: Number,
@@ -6,13 +9,19 @@ const props = defineProps({
   },
 });
 
+
+
 onBeforeMount(() => {
-  refreshShare().then(async () => {
-    console.log("share: ", share);
-    refreshDepot();
+  refreshShare().then(async (res) => {
+    await refreshDepot();
+    await refreshDeliveryCycles();
     shareSize.value = await getCSAShareSizeById(share.value.of_share_size);
     shareType.value = await getCSAShareTypeById(shareSize.value.of_type);
   });
+});
+
+onMounted(async() => {
+  await refreshDeliveryCycles();
 });
 
 const emit = defineEmits(["refreshDepot"]);
@@ -22,21 +31,27 @@ const share: Ref<csaShareOfMembership> = ref<csaShareOfMembership>(
 ); //ref<csaShareOfMembership>();
 
 const refreshShare = async () => {
-  console.log("refreshing share");
   share.value = await getCSAShareOfMemberShipById(props.csaShare);
+  return share.value;
 };
 
-//await getCSAShareOfMemberShipById(props.csaShare);
-console.log("share: ", share);
-const shareSize: Ref<csaShareSize> = ref<csaShareSize>(await getCSAShareSizeById(share.value.of_share_size));
-const shareType: Ref<csaShareType> = ref<csaShareType>(await getCSAShareTypeById(shareSize.value.of_type));
-const depot: Ref<csaDepot|undefined> = ref(undefined);
+const refreshDeliveryCycles = async () => {
+  deliveryCycles.value = await getCSARecurringShareInstances(share.value)
+};
+
+//depot stuff
+const shareSize: Ref<csaShareSize> = ref<csaShareSize>(
+  await getCSAShareSizeById(share.value.of_share_size)
+);
+
+const shareType: Ref<csaShareType> = ref<csaShareType>(
+  await getCSAShareTypeById(shareSize.value.of_type)
+);
+
+const depot: Ref<csaDepot | undefined> = ref(undefined);
 
 const refreshDepot = async () => {
-  console.log("refreshing depot");
-
   depot.value = await getCSADepotById(share.value.default_depot).then((res) => {
-    console.log("depot: ", res);
     return res;
   });
 };
@@ -51,8 +66,6 @@ function toggleDepotForm() {
 
 async function updateDepot(newDepot: number) {
   await updateDefaultDepot(props.csaShare, newDepot).then(() => {
-    console.log(newDepot);
-
     refreshShare().then(() => {
       refreshDepot();
       toggleDepotForm();
@@ -60,6 +73,10 @@ async function updateDepot(newDepot: number) {
     });
   });
 }
+
+//get delivery dates
+const deliveryCycles: Ref<(csaDeliveryCycleWithDeliveries[]|undefined)> = ref(undefined);
+
 </script>
 
 <template>
@@ -101,6 +118,31 @@ async function updateDepot(newDepot: number) {
       </div>
     </div>
     <h3>scheduled deliveries for this share:</h3>
+    <div v-if="deliveryCycles == undefined">
+      <p>loading</p>
+    </div>
+    <div v-else-if="deliveryCycles.length == 0">
+      <p>no deliveries scheduled yet</p>
+    </div>
+    <div v-else-if="deliveryCycles.length > 0">
+      <div v-for="(deliveryCycle, index) in deliveryCycles" :key="index">
+        <h3>{{ deliveryCycle.deliveryCycle.name_of_delivery_cycle }}</h3>
+        <div v-if="deliveryCycle.deliveries.length == 0">
+          <p>no deliveriessss scheduled yet</p>
+        </div>
+        <div v-else>
+          juhuuu
+          <div
+            v-for="(delivery, index) in deliveryCycle.deliveries"
+            :key="index"
+          >
+          <CSADeliveryListItem :deliveryCycleId="deliveryCycle.deliveryCycle.id" :index="index" :delivery="delivery" />
+            
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- {{ deliveryCycles}} -->
     <!-- <CSARecurringShareInstance
       v-for="shareInstance in share.csa_recurring_share_instance"
       :key="shareInstance"

@@ -10,6 +10,16 @@ export async function getCSADeliveryCycles(): Promise<csaDeliveryCycle[]> {
   return deliveryCycles;
 }
 
+export async function getCsaDeliveryCycleById(id: number): Promise<csaDeliveryCycle> {
+  const directus = await useDirectus();
+
+  const deliveryCycle: csaDeliveryCycle = await directus.request(
+    readItem("csa_delivery_cycle", id),
+  );
+
+  return deliveryCycle;
+}
+
 export async function getCSADeliveryCycleExceptionsOfDeliveryCycleByID(id: number): Promise<csaDeliveryCycleException[]> {
   const directus = await useDirectus();
 

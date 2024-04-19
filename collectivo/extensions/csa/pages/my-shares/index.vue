@@ -1,4 +1,9 @@
 <script setup lang="ts">
+
+definePageMeta({
+  middleware: ["auth"],
+});
+
 const memberships = ref<csaMembership[]>([]);
 
 const refreshMemberships = async () => {

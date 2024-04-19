@@ -180,6 +180,15 @@ schema.fields = [
     },
     {
         collection: "csa_delivery_cycle",
+        field: "delivered_share_types",
+        type: "alias",
+        meta: {
+            interface: "list-m2m",
+            special: ["m2m"],
+        }
+    },
+    {
+        collection: "csa_delivery_cycle",
         field: "csa_delivery_cycle_exception",
         meta: {
             interface: "list-o2m",   

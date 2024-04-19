@@ -9,6 +9,7 @@ declare global {
     csa_delivery: csaDelivery[];
     csa_delivery_cycle: csaDeliveryCycle[];
     csa_delivery_cycle_exception: csaDeliveryCycleException[];
+    csa_delivery_cycle_with_deliveries: csaDeliveryCycleWithDeliveries[];
   }
   interface csaMembership {
     id: number;
@@ -31,6 +32,7 @@ declare global {
   interface csaShareType {
     id: number;
     csa_share_type_name: string;
+    delivered_on?: number[];
   }
 
   interface csaDepot {
@@ -51,6 +53,7 @@ declare global {
     repeats_on?: number | null;
     interval_of_delivery_cycle?: string | null;
     date_of_last_delivery?: Date | null;
+    delivered_share_types?: number[];
   }
   interface csaDeliveryCycleException {
     id: number;
@@ -61,6 +64,11 @@ declare global {
   }
 
 //utility interfaces for frontend
+
+interface csaDeliveryCycleWithDeliveries {
+  deliveryCycle: csaDeliveryCycle;
+  deliveries: (Date | csaDeliveryCycleException)[];
+}
 interface Choice {
   value: number;
   label: string;

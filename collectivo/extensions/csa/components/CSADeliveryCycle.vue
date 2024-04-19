@@ -94,7 +94,7 @@ function toggleDeliveries() {
         >
           <UIcon name="i-heroicons-pencil-solid" />
         </NuxtLink>
-      </div>
+      </div>     
       <div
         v-if="deliveryCycle.type_of_delivery_cycle == 'single'"
         class="flex items-center"

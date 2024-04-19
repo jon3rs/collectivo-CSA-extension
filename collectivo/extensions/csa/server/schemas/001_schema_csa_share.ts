@@ -90,6 +90,20 @@ schema.fields = [
     },
     type: "alias",
   },
+  {
+    collection: "csa_share_type",
+    field: "delivered_on",
+    type: "alias",
+    meta: {
+      display: "related-values",
+      interface: "list-m2m",
+      note: "connect the share type to its delivery cycle",
+      options: {
+        enableCreate: false,
+      },
+      special: ["m2m"],
+    }
+  }
 ];
 
 schema.relations = [

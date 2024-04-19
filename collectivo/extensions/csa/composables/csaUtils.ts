@@ -1,4 +1,4 @@
-import { readRelations, readFieldsByCollection } from "@directus/sdk";
+import { readRelations, readFieldsByCollection, readItems } from "@directus/sdk";
 
 export const dateOptions = {
   weekday: "long",
@@ -45,6 +45,29 @@ export function createIntervalDescription(deliveryCycle: csaDeliveryCycle) {
         return `jeden letzten ${day} des Monats`;
     }
   }
+}
+
+
+export async function getCSARecurringShareInstances(shareOfMembership: csaShareOfMembership): Promise<csaDeliveryCycleWithDeliveries[]>{
+  const csaShareSize = await getCSAShareSizeById(shareOfMembership.of_share_size);
+  const csaShareType = await getCSAShareTypeById(csaShareSize.of_type);
+  const directus = useDirectus();
+
+  if(csaShareType.delivered_on){
+    console.log("is delivered on");
+
+    const deliveryCycles = await Promise.all(csaShareType.delivered_on.map(async (deliveryCycleId) => {
+      const deliveryCycle = await getCsaDeliveryCycleById(deliveryCycleId);
+      const deliveries = await getDeliveryCycleActualDeliveries(deliveryCycle);
+      return {deliveryCycle, deliveries};
+    }));
+    
+    console.log("csaShareType: ",csaShareType);
+    return deliveryCycles;
+  }
+  
+return []
+ 
 }
 
 
