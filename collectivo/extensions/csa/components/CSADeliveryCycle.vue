@@ -81,7 +81,7 @@ function toggleDeliveries() {
     <div class="my-5 rounded-xl bg-white shadow-sidebar px-3 py-5 block">
       <div class="flex justify-between mb-5">
         <h2 class="pr-3 break-all">
-          {{ deliveryCycle.name_of_delivery_cycle }}
+          {{ deliveryCycle.name_of_delivery_cycle }} {{ deliveryCycle.id  }}
         </h2>
         <NuxtLink
           :href="
@@ -209,7 +209,6 @@ function toggleDeliveries() {
             <CSADeliveryListItem
               :delivery="delivery"
               :index="index"
-              :deliveryCycleId="deliveryCycle.id"
             />
           </div>
         </div>

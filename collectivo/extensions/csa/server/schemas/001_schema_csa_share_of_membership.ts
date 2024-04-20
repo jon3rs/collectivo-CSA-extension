@@ -89,6 +89,15 @@ schema.fields = [
     },
     type: "alias",
   },
+  {
+    collection: "csa_share_of_membership",
+    field: "csa_share_of_membership_exceptions",
+    meta: {
+      interface: "list-o2m",
+      special: ["o2m"],
+    },
+    type: "alias",
+  }
 ];
 
 schema.relations = [

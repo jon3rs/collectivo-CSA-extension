@@ -21,7 +21,8 @@ onBeforeMount(() => {
 });
 
 onMounted(async() => {
-  await refreshDeliveryCycles();
+  //await refreshDeliveryCycles();
+  console.log("csaShare",props.csaShare)
 });
 
 const emit = defineEmits(["refreshDepot"]);
@@ -57,7 +58,14 @@ const refreshDepot = async () => {
 };
 
 const depotForm = ref(false);
-const csaDepots: csaDepot[] = await getCSADepots();
+
+const csaDepots: {value: number, label: string}[] = await getCSADepots().then((res) => {
+  console.log("csaDepots", res)
+  return res.map((depot) => {
+    return {value: depot.id, label: depot.csa_depot_name};
+  });
+})
+
 const checkedDepot = ref("");
 
 function toggleDepotForm() {
@@ -85,7 +93,7 @@ const deliveryCycles: Ref<(csaDeliveryCycleWithDeliveries[]|undefined)> = ref(un
       <p>the id of your share is {{ share.id }}</p>
       <div class="mt-2">
         <span class="inline-block font-bold mr-2">Typ:</span>
-        <span>{{ shareType.csa_share_type_name }}</span> <br />
+        <span>{{ shareType.csa_share_type_name }} {{ shareType.id }}</span> <br />
       </div>
       <div class="mt-2">
         <span class="inline-block font-bold mr-2">Größe:</span>
@@ -95,7 +103,8 @@ const deliveryCycles: Ref<(csaDeliveryCycleWithDeliveries[]|undefined)> = ref(un
         <span class="inline-block font-bold mr-2">Default Depot:</span>
         <span v-if="depot">{{ depot.csa_depot_name }}</span>
         <UButton @click="toggleDepotForm()">switch default depot</UButton>
-        <form
+        <FormRadioGroup v-if="depotForm"  v-model="checkedDepot" :options="csaDepots" @cancel="toggleDepotForm()" @update="updateDepot($event)"/>
+        <!-- <form
           v-if="depotForm == true"
           autocomplete="off"
           class="h-fit transition-all"
@@ -114,7 +123,7 @@ const deliveryCycles: Ref<(csaDeliveryCycleWithDeliveries[]|undefined)> = ref(un
           </ul>
           <UButton @click="updateDepot(checkedDepot)">update</UButton>
           <UButton @click="toggleDepotForm()">cancel</UButton>
-        </form>
+        </form> -->
       </div>
     </div>
     <h3>scheduled deliveries for this share:</h3>
@@ -136,7 +145,7 @@ const deliveryCycles: Ref<(csaDeliveryCycleWithDeliveries[]|undefined)> = ref(un
             v-for="(delivery, index) in deliveryCycle.deliveries"
             :key="index"
           >
-          <CSADeliveryListItem :deliveryCycleId="deliveryCycle.deliveryCycle.id" :index="index" :delivery="delivery" />
+          <CSADeliveryListItem @refreshDeliveries="refreshDeliveryCycles()"  :index="index" :delivery="delivery" :shareOfMembershipId="csaShare"/>
             
           </div>
         </div>

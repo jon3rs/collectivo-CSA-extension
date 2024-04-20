@@ -5,18 +5,6 @@ export default schema;
 schema.collections = [
   {
     collection: "csa_share_type_csa_delivery_cycle",
-    fields: [
-      {
-        field: "id",
-        meta: {
-          hidden: true,
-        },
-        schema: {
-          has_auto_increment: true,
-        },
-        type: "integer",
-      },
-    ],
     meta: {
       hidden: true,
       icon: "import_export",
@@ -74,3 +62,30 @@ schema.relations = [
     },
   },
 ];
+
+schema.permissions = [
+  /* {
+    action: "create",
+    collection: "csa_share_type_csa_delivery_cycle",
+    roleName: "collectivo_user",
+    fields: ["*"],
+  }, */
+  {
+    action: "read",
+    collection: "csa_share_type_csa_delivery_cycle",
+    roleName: "collectivo_user",
+    fields: ["*"],
+  },
+  {
+    action: "update",
+    collection: "csa_share_type_csa_delivery_cycle",
+    roleName: "collectivo_user",
+    fields: ["*"],
+  },
+  {
+    action: "delete",
+    collection: "csa_share_type_csa_delivery_cycle",
+    roleName: "collectivo_user",
+    fields: ["*"],
+  }
+]

@@ -116,7 +116,7 @@ const checkedDepot = ref("");
         <div v-else class="w-full">
           <div v-for="share in membership.csa_share_of_membership" :key="share">
             <CSAShareOfMembership
-              :csa-share="share"
+              :csaShare="share"
               @refreshDepot="refreshMemberships"
             />
           </div>

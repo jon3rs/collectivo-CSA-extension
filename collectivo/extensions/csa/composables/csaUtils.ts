@@ -1,4 +1,9 @@
-import { readRelations, readFieldsByCollection, readItems } from "@directus/sdk";
+import {
+  readRelations,
+  readFieldsByCollection,
+  readItems,
+  readItem,
+} from "@directus/sdk";
 
 export const dateOptions = {
   weekday: "long",
@@ -13,7 +18,7 @@ export function formatDate(date: Date): string {
 
 export function createIntervalDescription(deliveryCycle: csaDeliveryCycle) {
   let day: string = "";
-  
+
   const weekday = [
     "Sonntag",
     "Montag",
@@ -47,29 +52,120 @@ export function createIntervalDescription(deliveryCycle: csaDeliveryCycle) {
   }
 }
 
+export async function getCSARecurringShareInstances(
+  shareOfMembership: csaShareOfMembership
+): Promise<csaDeliveryCycleWithDeliveries[]> {
+  
+  const csaShareSize = await getCSAShareSizeById(
+    shareOfMembership.of_share_size
+  );
 
-export async function getCSARecurringShareInstances(shareOfMembership: csaShareOfMembership): Promise<csaDeliveryCycleWithDeliveries[]>{
-  const csaShareSize = await getCSAShareSizeById(shareOfMembership.of_share_size);
   const csaShareType = await getCSAShareTypeById(csaShareSize.of_type);
   const directus = useDirectus();
 
-  if(csaShareType.delivered_on){
-    console.log("is delivered on");
+  if (csaShareType.delivered_on) {
+    console.log("is delivered on", csaShareType.delivered_on);
 
-    const deliveryCycles = await Promise.all(csaShareType.delivered_on.map(async (deliveryCycleId) => {
-      const deliveryCycle = await getCsaDeliveryCycleById(deliveryCycleId);
-      const deliveries = await getDeliveryCycleActualDeliveries(deliveryCycle);
-      return {deliveryCycle, deliveries};
-    }));
-    
-    console.log("csaShareType: ",csaShareType);
+    const deliveryCycles = await Promise.all(
+      csaShareType.delivered_on.map(async (junctionRowId) => {
+        console.log("junctionRowId: ", junctionRowId);
+
+        const junction: csaShareTypeXDeliveryCycle = await directus.request(
+          readItem("csa_share_type_csa_delivery_cycle", junctionRowId)
+        );
+
+        const deliveryCycle = await getCsaDeliveryCycleById(
+          junction.csa_delivery_cycle_id
+        );
+
+        const deliveries =
+          await getDeliveryCycleActualDeliveries(deliveryCycle);
+          
+          const startDate =
+        deliveries[0] instanceof Date
+          ? deliveries[0]
+          : deliveries[0].original_delivery_date;
+
+      const endDate =
+        deliveries[deliveries.length - 1] instanceof Date
+          ? deliveries[deliveries.length - 1]
+          : deliveries[deliveries.length - 1]
+              .original_delivery_date;
+
+      const exceptions = await getShareOfMembershipExceptions(
+        shareOfMembership.id,
+        startDate,
+        endDate
+      );
+      
+      deliveries.forEach((delivery, index) => {
+      const deliveryDate = delivery instanceof Date ? delivery.toISOString().slice(0, 10) : new Date(delivery.original_delivery_date).toISOString().slice(0, 10);
+      console.log(`Checking delivery at index ${index} with date ${deliveryDate}`);
+      
+      const exception = exceptions.find((exception: csaShareOfMembershipException) => {
+            const exceptionDate = new Date(exception.date_of_share_exception).toISOString().slice(0, 10);
+            return exceptionDate == deliveryDate;
+          });
+          //(exception: csaShareOfMembershipException) => new Date(exception.date_of_share_exception).getTime() === (delivery instanceof Date ? delivery.getTime() : new Date(delivery.original_delivery_date).getTime())
+        //);
+        
+        console.log("delivery: ", delivery, "exception: ", exceptions);
+
+        if (exception) {
+          console.log("matching exception!!! ", exception);
+          deliveries[index] = exception;
+        }
+      });
+
+        return { deliveryCycle, deliveries };
+      })
+    );
+
+    console.log("calculated deliveries To display")
+
+    /* const updatedDeliveryCycles = await Promise.all(deliveryCycles.map(async (cycle) => {
+      const startDate =
+        cycle.deliveries[0] instanceof Date
+          ? cycle.deliveries[0]
+          : cycle.deliveries[0].original_delivery_date;
+
+      const endDate =
+        cycle.deliveries[cycle.deliveries.length - 1] instanceof Date
+          ? cycle.deliveries[cycle.deliveries.length - 1]
+          : cycle.deliveries[cycle.deliveries.length - 1]
+              .original_delivery_date;
+
+      const exceptions = await getShareOfMembershipExceptions(
+        shareOfMembership.id,
+        startDate,
+        endDate
+      );
+
+      const updatedDeliveries = await Promise.all(cycle.deliveries.map(async (delivery) => {
+        const deliveryDate =
+          delivery instanceof Date ? delivery : new Date(delivery.original_delivery_date);
+        
+          const exception = exceptions.find(
+          (exception: csaShareOfMembershipException) => new Date(exception.date_of_share_exception).getTime() === deliveryDate.getTime()
+        );
+
+        if (exception) {
+          console.log("matching exception!!! ", exception);
+          return exception;
+        }
+
+        return delivery;
+      }));
+      console.log("updatedDeliveries: ", updatedDeliveries);
+      return {...cycle, deliveries: updatedDeliveries};
+    })); */
+
+    console.log("deliveryCycles: ", deliveryCycles);
     return deliveryCycles;
   }
-  
-return []
- 
-}
 
+  return [];
+}
 
 export async function getDeliveryCycleActualDeliveries(
   deliveryCycle: csaDeliveryCycle,
@@ -92,7 +188,9 @@ export async function getDeliveryCycleActualDeliveries(
     ...cancelledDeliveries,
   ];
 
-  let cancelledAndPostponedDeliveriesCopy = [...cancelledAndPostponedDeliveries];
+  let cancelledAndPostponedDeliveriesCopy = [
+    ...cancelledAndPostponedDeliveries,
+  ];
   let addRemainingAdditionals = false;
   // todo: outsource the whole firstDateCalculation into a separate function
   let firstDeliveryDate = new Date(deliveryCycle.date_of_first_delivery);
@@ -100,7 +198,8 @@ export async function getDeliveryCycleActualDeliveries(
 
   if (
     new Date(deliveryCycle.date_of_first_delivery).getDay() !==
-    deliveryCycle.repeats_on && deliveryCycle.repeats_on
+      deliveryCycle.repeats_on &&
+    deliveryCycle.repeats_on
   ) {
     firstDeliveryDate.setDate(
       firstDeliveryDate.getDate() +
@@ -120,7 +219,7 @@ export async function getDeliveryCycleActualDeliveries(
       deliveryCycle
     );
   }
-  
+
   let counter = 0;
   let actualDeliveryDates: (Date | csaDeliveryCycleException)[] = [];
 
@@ -137,7 +236,7 @@ export async function getDeliveryCycleActualDeliveries(
             actualDeliveryDates.push(exception);
 
             additionalDeliveries = additionalDeliveries.filter(
-              exception => !actualDeliveryDates.includes(exception)
+              (exception) => !actualDeliveryDates.includes(exception)
             );
           }
         }
@@ -154,30 +253,34 @@ export async function getDeliveryCycleActualDeliveries(
 
       additionalDeliveriesCopy.forEach(
         (exception: csaDeliveryCycleException) => {
-          if(new Date(exception.original_delivery_date) <
-          new Date(lastDeliveryDate)){
-            additionalDeliveries.splice(additionalDeliveries.indexOf(exception), 1);
-          } else if (
+          if (
             new Date(exception.original_delivery_date) <
-              new Date(currentDate)
+            new Date(lastDeliveryDate)
+          ) {
+            additionalDeliveries.splice(
+              additionalDeliveries.indexOf(exception),
+              1
+            );
+          } else if (
+            new Date(exception.original_delivery_date) < new Date(currentDate)
           ) {
             actualDeliveryDates.push(exception);
-
-            
-      
           }
-          
         }
       );
 
       additionalDeliveries = additionalDeliveries.filter(
-        exception => !actualDeliveryDates.includes(exception)
+        (exception) => !actualDeliveryDates.includes(exception)
       );
 
       additionalDeliveriesCopy = additionalDeliveries;
     }
 
-    if (deliveryCycle.date_of_last_delivery && calculateAdjacentDelivery(currentDate, 1, deliveryCycle) > new Date(deliveryCycle.date_of_last_delivery)) {
+    if (
+      deliveryCycle.date_of_last_delivery &&
+      calculateAdjacentDelivery(currentDate, 1, deliveryCycle) >
+        new Date(deliveryCycle.date_of_last_delivery)
+    ) {
       addRemainingAdditionals = true;
     }
 
@@ -193,11 +296,9 @@ export async function getDeliveryCycleActualDeliveries(
           objectToPush = exception;
 
           cancelledAndPostponedDeliveries.filter(
-            exception => !actualDeliveryDates.includes(exception)
+            (exception) => !actualDeliveryDates.includes(exception)
           );
         }
-
-        
       }
     );
 
@@ -205,20 +306,22 @@ export async function getDeliveryCycleActualDeliveries(
 
     counter++;
     actualDeliveryDates.push(objectToPush);
-    
-    if(addRemainingAdditionals){
-      actualDeliveryDates = actualDeliveryDates.concat(additionalDeliveriesCopy);
+
+    if (addRemainingAdditionals) {
+      actualDeliveryDates = actualDeliveryDates.concat(
+        additionalDeliveriesCopy
+      );
     }
 
     if (deliveryCycle.repeats_on !== null) {
       nextDeliveryDate = calculateAdjacentDelivery(
         firstDeliveryDate,
-        counter+(offset*limit),
+        counter + offset * limit,
         deliveryCycle
       );
 
       currentDate = new Date(nextDeliveryDate);
-    }else{
+    } else {
       // @to do: look for additionals after
       break;
     }

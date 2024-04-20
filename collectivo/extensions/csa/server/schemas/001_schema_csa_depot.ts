@@ -45,6 +45,15 @@ schema.fields = [
     },
     type: "alias",
   },
+  {
+    collection: "csa_depot",
+    field: "exceptional_pick_ups",
+    meta: {
+      interface: "list-o2m",
+      special: ["o2m"],
+    },
+    type: "alias",
+  }
 ];
 
 schema.permissions = [
