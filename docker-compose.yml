@@ -2,11 +2,7 @@ version: "3"
 
 services:
   directus:
-<<<<<<< HEAD
-    image: directus/directus:10.9.1
-=======
     image: directus/directus:10.10.7
->>>>>>> upstream/main
     ports:
       - 8055:8055
     volumes:
