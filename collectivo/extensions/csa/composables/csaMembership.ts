@@ -1,5 +1,6 @@
 import {
   readMe,
+  readItem,
   readItems,
   createItem,
   updateItem,
@@ -63,4 +64,10 @@ export async function getCollection(collection_name: string) {
   console.log(user);
   const result = await directus.request(readCollection(collection_name));
   return result;
+}
+
+export async function getCSAMembershipById(id: number ) {
+  const directus = await useDirectus();
+  const membership  = await directus.request(readItem('csa_membership', id));
+  return membership;
 }

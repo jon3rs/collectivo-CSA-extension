@@ -8,9 +8,6 @@ setCollectivoTitle("Lieferzyklen");
 
 
 const deliveryCycles: csaDeliveryCycle[] = await getCSADeliveryCycles();
-const fieldsOfDeliveryCycles = await getFieldsByCollection("csa_delivery_cycle");
-const fieldsOfExceptions = await getFieldsByCollection("csa_delivery_cycle_exception");
-const relations = await getRelations();
 </script>
 
 <template>

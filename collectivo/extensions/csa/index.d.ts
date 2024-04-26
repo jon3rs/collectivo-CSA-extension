@@ -2,6 +2,7 @@ declare global {
   interface CollectivoSchema {
     csa_membership: csaMembership[];
     csa_share_of_membership: csaShareOfMembership[];
+    csa_share_of_membership_exception: csaShareOfMembershipException[];
     csa_share_size: csaShareSize[];
     csa_share_type: csaShareType[];
     csa_depot: csaDepot[];
@@ -10,6 +11,7 @@ declare global {
     csa_delivery_cycle_exception: csaDeliveryCycleException[];
     csa_delivery_cycle_with_deliveries: csaDeliveryCycleWithDeliveries[];
     csa_share_type_csa_delivery_cycle: csaShareTypeXDeliveryCycle[];
+    csa_share_tile: shareTile[];
   }
   interface csaMembership {
     id: number;
@@ -80,6 +82,11 @@ declare global {
   interface Choice {
     value: number;
     label: string;
+  }
+
+  interface csaShareTile {
+    delivery: csaDeliveryCycleException | csaShareOfMembershipException | Date;
+    of_share_of_membership: number;
   }
 }
 export {};

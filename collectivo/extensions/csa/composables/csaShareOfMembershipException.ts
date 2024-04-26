@@ -1,9 +1,10 @@
 import { createItem, readItems, deleteItem, updateItem } from "@directus/sdk";
 
-export async function createAlternateDepotException(
+export async function createShareOfMembershipException(
   shareOfMembershipId: number,
   date: Date,
-  depotId: number
+  type: string,
+  depotId?: number
 ) {
   const directus = useDirectus();
   console.log("alternate Depot exception", shareOfMembershipId, date, depotId);
@@ -12,7 +13,7 @@ export async function createAlternateDepotException(
     createItem("csa_share_of_membership_exception", {
       of_share_of_membership: shareOfMembershipId,
       date_of_share_exception: date,
-      csa_type_of_share_of_membership_exception: "alternate_depot",
+      csa_type_of_share_of_membership_exception: type,
       alternate_depot: depotId,
     })
   );
@@ -35,7 +36,6 @@ export async function getShareOfMembershipExceptions(
       })
     );
 
-    console.log("returning exceptions", shareOfMembershipExceptions)
     return shareOfMembershipExceptions;
   } else {
     const shareOfMembershipExceptions = await directus.request(
@@ -56,34 +56,20 @@ export async function deleteCsaShareOfMembershipException(id: number) {
   return deletedException;
 }
 
-export async function updateAlternateDepotException(
+export async function updateShareOfMembershipException(
   exceptionId: number,
-  depotId: number
+  type: string,
+  depotId: number | null = null
 ) {
   const directus = useDirectus();
   
   const updatedException = await directus.request(
     updateItem("csa_share_of_membership_exception", exceptionId, {
       alternate_depot: depotId,
+      csa_type_of_share_of_membership_exception: type,
     })
   );
 
   return updatedException;
 }
 
-export async function createSuspendedDeliveryException(
-  shareOfMembershipId: number,
-  date: Date
-) {
-  const directus = useDirectus();
-
-  const newSuspendedDeliveryException = await directus.request(
-    createItem("csa_share_of_membership_exception", {
-      of_share_of_membership: shareOfMembershipId,
-      date_of_share_exception: date,
-      csa_type_of_share_of_membership_exception: "suspend",
-    })
-  );
-
-  return newSuspendedDeliveryException;
-}

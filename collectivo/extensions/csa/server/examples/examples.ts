@@ -12,6 +12,7 @@ export default async function examples() {
   );
 
   await directus.request(deleteItems("csa_depot", { limit: 1000 }));
+  await directus.request(deleteItems("collectivo_tiles", { limit: 1000 }));
 
 
   let exampleTypeID = 1;
@@ -74,6 +75,13 @@ export default async function examples() {
     } catch (error) {
       console.info(error);
     }
+  }
+
+  try {
+    await directus.request(createItem("collectivo_tiles", {tiles_name:"nächste Anteil",tiles_status:"published",tiles_component:"csaShareTile"}));
+    console.info("created csaTile");
+  } catch (error) {
+    console.info(error);
   }
 
   //create example data for csa_delivery
