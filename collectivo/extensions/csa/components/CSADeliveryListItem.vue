@@ -42,7 +42,7 @@ async function addAlternateDepotException(depot: number) {
   if(props.shareOfMembershipId && instanceOfCsaShareOfMembershipException(props.delivery) ) {
     await updateShareOfMembershipException(props.delivery.id, 'alternate_depot', depot );
 
-  }else if(date) {
+  }else if(date instanceof Date && props.shareOfMembershipId) {
     await createShareOfMembershipException(props.shareOfMembershipId, date, 'alternate_depot', depot);
   }
 

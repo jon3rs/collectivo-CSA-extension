@@ -13,11 +13,7 @@ export const dateOptions = {
 };
 
 export function formatDate(date: Date): string {
-  console.log(
-    "formatting date:",
-    date,
-    new Date(date).toLocaleDateString("de-DE", dateOptions)
-  );
+
   return new Date(date).toLocaleDateString("de-DE", dateOptions);
 }
 
@@ -93,11 +89,11 @@ export async function getNextDeliveries(limit: number = 3): Promise<csaShareTile
   const shareInstances = (
     await Promise.all(
       sharesOfMemberships.map(async (shareOfMembership) => {
-        const deliveries: shareTile[] = [];
+        const deliveries: csaShareTile[] = [];
         
         await getCSARecurringShareInstances(
           shareOfMembership,
-          limit
+          limit, 0, new Date()
         ).then((res) => {
 
           res.forEach((element) => {
@@ -114,6 +110,8 @@ export async function getNextDeliveries(limit: number = 3): Promise<csaShareTile
       })
     )
   ).flat();
+
+  console.log("shareInstances: ", shareInstances);
 
   shareInstances.sort(function(a, b){
     const dateA = getDeliveryDate(a.delivery);
@@ -140,12 +138,8 @@ export async function getCSARecurringShareInstances(
   const directus = useDirectus();
 
   if (csaShareType.delivered_on) {
-    console.log("is delivered on", csaShareType.delivered_on);
-
     const deliveryCycles = await Promise.all(
       csaShareType.delivered_on.map(async (junctionRowId) => {
-        console.log("junctionRowId: ", junctionRowId);
-
         const junction: csaShareTypeXDeliveryCycle = await directus.request(
           readItem("csa_share_type_csa_delivery_cycle", junctionRowId)
         );
@@ -206,7 +200,6 @@ export async function getCSARecurringShareInstances(
       })
     );
 
-    console.log("calculated deliveries To display");
 
     /* const updatedDeliveryCycles = await Promise.all(deliveryCycles.map(async (cycle) => {
       const startDate =
@@ -244,8 +237,6 @@ export async function getCSARecurringShareInstances(
       console.log("updatedDeliveries: ", updatedDeliveries);
       return {...cycle, deliveries: updatedDeliveries};
     })); */
-
-    console.log("deliveryCycles: ", deliveryCycles);
     return deliveryCycles;
   }
 
