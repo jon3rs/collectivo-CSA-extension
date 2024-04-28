@@ -268,6 +268,7 @@ export async function getDeliveryCycleActualDeliveries(
   let cancelledAndPostponedDeliveriesCopy = [
     ...cancelledAndPostponedDeliveries,
   ];
+  
   let addRemainingAdditionals = false;
   // todo: outsource the whole firstDateCalculation into a separate function
   let nextDeliveryDate: Date;
@@ -287,6 +288,12 @@ export async function getDeliveryCycleActualDeliveries(
     await getCSADeliveryCycleExceptionsOfDeliveryCycleByID(deliveryCycle.id);
 
   let currentDate = firstDeliveryDate;
+
+  if(calculateAdjacentDelivery(firstDeliveryDate, 0, deliveryCycle)< currentDate){
+    currentDate = calculateAdjacentDelivery(firstDeliveryDate, 1, deliveryCycle);
+  }else{
+    currentDate = calculateAdjacentDelivery(firstDeliveryDate, 0, deliveryCycle);
+  }
 
   if (offset > 0) {
     currentDate = calculateAdjacentDelivery(
