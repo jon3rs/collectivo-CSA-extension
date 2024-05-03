@@ -15,7 +15,7 @@ const props = defineProps({
 const emit = defineEmits(["refreshDeliveries"]);
 
 const shareOfMembership: Ref<csaShareOfMembership> = ref(
-  await getCSAShareOfMemberShipById(props.shareOfMembershipId)
+  await getCSAShareOfMembershipById(props.shareOfMembershipId)
 );
 
 const membership: Ref<csaMembership> = ref(
@@ -39,7 +39,7 @@ const shareType: Ref<csaShareType> = ref(
 );
 
 const getShareOfMembership = async () => {
-  shareOfMembership.value = await getCSAShareOfMemberShipById(
+  shareOfMembership.value = await getCSAShareOfMembershipById(
     props.shareOfMembershipId
   );
 };
@@ -60,6 +60,16 @@ watch(depotForm, async (newForm) => {
   }
 });
 
+//the rest of the component doesn't update automatically when the shareOfMembershipId changes
+watch(() => props.shareOfMembershipId, async (newValue, oldValue) => {
+  if (newValue !== oldValue) {
+  shareOfMembership.value = await getCSAShareOfMembershipById(newValue);
+  shareSize.value = await getCSAShareSizeById(shareOfMembership.value.of_share_size);
+  shareType.value = await getCSAShareTypeById(shareSize.value.of_type);
+  defaultDepot.value = await getCSADepotById(shareOfMembership.value.default_depot);
+}});
+
+
 async function refreshDepots(): Promise<{ value: number; label: string }[]>{
   return await getCSADepots().then((res) => {
     let altDepot = null;
@@ -69,7 +79,6 @@ async function refreshDepots(): Promise<{ value: number; label: string }[]>{
     }
 
     return res.map((depot) => {
-      console.log("defaultDepot", defaultDepot.value.id, depot.id, altDepot, depot.id == altDepot)
       return {
         value: depot.id,
         label: depot.csa_depot_name,
@@ -81,7 +90,6 @@ async function refreshDepots(): Promise<{ value: number; label: string }[]>{
 
 //move to utils maybe?
 async function addAlternateDepotException(depot: number) {
-  console.log("addAlternateDepotException", depot, defaultDepot)
 
   if (
     props.shareOfMembershipId &&
@@ -115,7 +123,7 @@ async function addAlternateDepotException(depot: number) {
 }
 
 async function suspendDelivery(){
-  if(instanceOfCsaShareOfMembershipException(props.delivery) && props.delivery.csa_type_of_share_of_membership_exception == 'alternate_depot'){
+  if(instanceOfCsaShareOfMembershipException(props.delivery)){
     await updateShareOfMembershipException(props.delivery.id, 'suspended', null);
   }else if (instanceOfCsaDeliveryCycleException(props.delivery)){
     await createShareOfMembershipException(props.shareOfMembershipId, props.delivery.original_delivery_date, 'suspended');
@@ -141,7 +149,6 @@ const alternateDepotName = ref("");
 async function getDepotName(id: number) {
    await getCSADepotById(id).then((res) => {
     alternateDepotName.value = res.csa_depot_name;
-    console.log("fetched alternateDepotName ", alternateDepotName.value, res);
 });
 
   return alternateDepotName.value;
@@ -152,12 +159,8 @@ onMounted(async () => {
   csaDepots.value = await refreshDepots();
 
   if(instanceOfCsaShareOfMembershipException(props.delivery) && props.delivery.csa_type_of_share_of_membership_exception == 'alternate_depot'){
-    console.log("aalternateDepotName id", props.delivery)
     await getDepotName(props.delivery.alternate_depot);
   }
-
-  console.log("alternateDepotName ", alternateDepotName);
-  console.log("shareOfMembership", shareOfMembership.value.of_share_size);
 });
 </script>
 
@@ -187,7 +190,7 @@ onMounted(async () => {
     </div>
     <div>
       <p>
-        {{ shareType.csa_share_type_name }} {{ shareSize.csa_share_size_name }}
+        {{ shareType.csa_share_type_name }} {{ shareSize.csa_share_size_name }} 
       </p>
     </div>
     <div class="flex items-center">
@@ -224,9 +227,9 @@ onMounted(async () => {
       "
       class="mt-2"
     >
-      <UButton @click="toggleDepotForm()">Depot wechseln</UButton>
-      <UButton v-if="!(instanceOfCsaShareOfMembershipException(delivery) && delivery.csa_type_of_share_of_membership_exception == 'suspended')" @click="suspendDelivery()">aussetzen</UButton>
-      <UButton v-else @click="deleteException()">zurücksetzen</UButton>
+      <UButton @click="toggleDepotForm()" :disabled="(instanceOfCsaShareOfMembershipException(delivery) && delivery.csa_type_of_share_of_membership_exception == 'suspended')">Depot wechseln</UButton>
+      <UButton v-if="!(instanceOfCsaShareOfMembershipException(delivery) && delivery.csa_type_of_share_of_membership_exception == 'suspended')" @click="suspendDelivery()" class="ml-2" >aussetzen</UButton>
+      <UButton v-else @click="deleteException()" class="ml-2" >zurücksetzen</UButton>
       <FormRadioGroup
         v-if="depotForm"
         v-model="alternateDepot"

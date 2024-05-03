@@ -19,10 +19,6 @@ export async function getCsaDeliveryCycleById(
     readItem("csa_delivery_cycle", id)
   );
 
-  if(deliveryCycle.date_of_last_delivery){
-    console.log("last one" , typeof deliveryCycle.date_of_last_delivery)
-  }
-
   return deliveryCycle;
 }
 

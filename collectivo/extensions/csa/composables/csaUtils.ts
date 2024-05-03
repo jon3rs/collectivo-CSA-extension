@@ -86,6 +86,7 @@ export async function getNextDeliveries(limit: number = 3): Promise<csaShareTile
     )
   ).flat();
 
+
   const shareInstances = (
     await Promise.all(
       sharesOfMemberships.map(async (shareOfMembership) => {
@@ -111,25 +112,26 @@ export async function getNextDeliveries(limit: number = 3): Promise<csaShareTile
     )
   ).flat();
 
-  console.log("shareInstances: ", shareInstances);
 
   shareInstances.sort(function(a, b){
     const dateA = getDeliveryDate(a.delivery);
     const dateB = getDeliveryDate(b.delivery);
     return dateA.getTime()-dateB.getTime();
   })
-  /*   recurringShareInstances.forEach(())
-   */
 
   return shareInstances.slice(0, limit);
 }
 
 export async function getCSARecurringShareInstances(
-  shareOfMembership: csaShareOfMembership,
+  shareOfMembership: csaShareOfMembership | number,
   limit = 10,
   offset = 0,
   firstDeliveryDate?: Date
 ): Promise<csaDeliveryCycleWithDeliveries[]> {
+  if (typeof shareOfMembership === "number") {
+    shareOfMembership = await getCSAShareOfMembershipById(shareOfMembership);
+  }
+  
   const csaShareSize = await getCSAShareSizeById(
     shareOfMembership.of_share_size
   );
@@ -176,16 +178,12 @@ export async function getCSARecurringShareInstances(
         deliveries.forEach((delivery, index) => {
           const deliveryDate =
             delivery instanceof Date
-              ? delivery.toISOString().slice(0, 10)
+              ? new Date(Date.UTC(delivery.getFullYear(), delivery.getMonth(), delivery.getDate()))
               : new Date(delivery.original_delivery_date)
-                  .toISOString()
-                  .slice(0, 10);
 
           const exception = exceptions.find((exception) => {
             const exceptionDate = new Date(exception.date_of_share_exception)
-              .toISOString()
-              .slice(0, 10);
-            return exceptionDate == deliveryDate;
+            return exceptionDate.getTime() == deliveryDate.getTime();
           });
           //(exception: csaShareOfMembershipException) => new Date(exception.date_of_share_exception).getTime() === (delivery instanceof Date ? delivery.getTime() : new Date(delivery.original_delivery_date).getTime())
           //);
@@ -201,42 +199,6 @@ export async function getCSARecurringShareInstances(
     );
 
 
-    /* const updatedDeliveryCycles = await Promise.all(deliveryCycles.map(async (cycle) => {
-      const startDate =
-        cycle.deliveries[0] instanceof Date
-          ? cycle.deliveries[0]
-          : cycle.deliveries[0].original_delivery_date;
-
-      const endDate =
-        cycle.deliveries[cycle.deliveries.length - 1] instanceof Date
-          ? cycle.deliveries[cycle.deliveries.length - 1]
-          : cycle.deliveries[cycle.deliveries.length - 1]
-              .original_delivery_date;
-
-      const exceptions = await getShareOfMembershipExceptions(
-        shareOfMembership.id,
-        startDate,
-        endDate
-      );
-
-      const updatedDeliveries = await Promise.all(cycle.deliveries.map(async (delivery) => {
-        const deliveryDate =
-          delivery instanceof Date ? delivery : new Date(delivery.original_delivery_date);
-        
-          const exception = exceptions.find(
-          (exception: csaShareOfMembershipException) => new Date(exception.date_of_share_exception).getTime() === deliveryDate.getTime()
-        );
-
-        if (exception) {
-          console.log("matching exception!!! ", exception);
-          return exception;
-        }
-
-        return delivery;
-      }));
-      console.log("updatedDeliveries: ", updatedDeliveries);
-      return {...cycle, deliveries: updatedDeliveries};
-    })); */
     return deliveryCycles;
   }
 
@@ -288,9 +250,11 @@ export async function getDeliveryCycleActualDeliveries(
     await getCSADeliveryCycleExceptionsOfDeliveryCycleByID(deliveryCycle.id);
 
   let currentDate = firstDeliveryDate;
+  let counter = 0;
 
-  if(calculateAdjacentDelivery(firstDeliveryDate, 0, deliveryCycle)< currentDate){
+  if(counter ==0 && calculateAdjacentDelivery(firstDeliveryDate, 0, deliveryCycle)< currentDate.setDate(currentDate.getDate() - 1)){
     currentDate = calculateAdjacentDelivery(firstDeliveryDate, 1, deliveryCycle);
+    counter++;
   }else{
     currentDate = calculateAdjacentDelivery(firstDeliveryDate, 0, deliveryCycle);
   }
@@ -303,7 +267,6 @@ export async function getDeliveryCycleActualDeliveries(
     );
   }
 
-  let counter = 0;
   let actualDeliveryDates: (Date | csaDeliveryCycleException)[] = [];
 
   while (

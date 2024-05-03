@@ -19,7 +19,6 @@ const shareInstance = ref<csaRecurringShareInstance>(
 );
 
 onBeforeMount(() => {
-  console.log("props: ", props.shareInstanceId);
   refreshShareInstance();
 });
 
@@ -49,8 +48,6 @@ async function toggleInstanceStatus() {
     !shareInstance.value.csa_share_instance_status
   ).then((res: csaRecurringShareInstance) => {
     shareInstance.value = res;
-    console.log(res);
-    console.log("updated status");
   });
 }
 
@@ -80,8 +77,6 @@ async function updateRecurringShareInstanceDepot(depot: number) {
     shareInstance.value = res;
     depotPickerToggle.value = false;
     refreshShareInstance();
-    console.log(res);
-    console.log("updated depot");
   });
 }
 

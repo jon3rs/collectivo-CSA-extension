@@ -61,7 +61,6 @@ export async function deleteCSAMembership(id: number) {
 export async function getCollection(collection_name: string) {
   const directus = useDirectus();
   const user = await directus.request(readMe({ fields: ["id"] }));
-  console.log(user);
   const result = await directus.request(readCollection(collection_name));
   return result;
 }

@@ -12,7 +12,7 @@ export async function getCSASharesOfMembership(
   return shareOfMembership;
 }
 
-export async function getCSAShareOfMemberShipById(
+export async function getCSAShareOfMembershipById(
   id: number,
 ): Promise<csaShareOfMembership> {
   const directus = await useDirectus();

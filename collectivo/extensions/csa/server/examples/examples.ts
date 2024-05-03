@@ -79,6 +79,8 @@ export default async function examples() {
 
   try {
     await directus.request(createItem("collectivo_tiles", {tiles_name:"nächste Anteil",tiles_status:"published",tiles_component:"csaShareTile"}));
+    await directus.request(createItem("collectivo_tiles", {tiles_name:"Kommissionierung",tiles_status:"published",tiles_component:"csaCommissioningTile"}));
+
     console.info("created csaTile");
   } catch (error) {
     console.info(error);

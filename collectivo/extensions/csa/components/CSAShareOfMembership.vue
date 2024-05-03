@@ -20,19 +20,15 @@ onBeforeMount(() => {
   });
 });
 
-onMounted(async() => {
-  //await refreshDeliveryCycles();
-  console.log("csaShare",props.csaShare)
-});
 
 const emit = defineEmits(["refreshDepot"]);
 
 const share: Ref<csaShareOfMembership> = ref<csaShareOfMembership>(
-  await getCSAShareOfMemberShipById(props.csaShare)
+  await getCSAShareOfMembershipById(props.csaShare)
 ); //ref<csaShareOfMembership>();
 
 const refreshShare = async () => {
-  share.value = await getCSAShareOfMemberShipById(props.csaShare);
+  share.value = await getCSAShareOfMembershipById(props.csaShare);
   return share.value;
 };
 
@@ -60,7 +56,6 @@ const refreshDepot = async () => {
 const depotForm = ref(false);
 
 const csaDepots: {value: number, label: string}[] = await getCSADepots().then((res) => {
-  console.log("csaDepots", res)
   return res.map((depot) => {
     return {value: depot.id, label: depot.csa_depot_name};
   });

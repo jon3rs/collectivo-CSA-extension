@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type CSADeliveryListItem from '../CSADeliveryListItem.vue';
 
 const user = useCollectivoUser();
 const memberships: Ref<csaMembership[]> = ref(await getCSAMembershipsOfCurrentUser());
@@ -24,9 +23,8 @@ const refreshMemberships = async () => {
 const deliveries: Ref<csaShareTile[]> = ref(await getNextDeliveries(5));
 
 const  refreshDeliveries = async () =>{
-  console.log("refreshingggg")
   deliveries.value = await getNextDeliveries(5);
-  console.log("deliveriessss: ", deliveries)
+  console.log("deliveries:", deliveries.value);
 }
 
 
@@ -34,7 +32,7 @@ const  refreshDeliveries = async () =>{
 onMounted(async () =>{
   getMembershipOwners();
   getMembershipShares();
-  console.log("next Deliveries: ", deliveries)
+  console.log(deliveries.value);
 })
 
 </script>

@@ -28,7 +28,7 @@ function toggleDepotForm() {
 
 const csaDepots: {value: number, label: string}[]|undefined = !props.shareOfMembershipId ?  undefined : await getCSADepots().then(async (res) => {
 
-  const defaultDepot = !props.shareOfMembershipId ?  '' : await getCSAShareOfMemberShipById(props.shareOfMembershipId).then((res) => {
+  const defaultDepot = !props.shareOfMembershipId ?  '' : await getCSAShareOfMembershipById(props.shareOfMembershipId).then((res) => {
     return res.default_depot;
   });
 
