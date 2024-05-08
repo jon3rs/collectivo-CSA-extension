@@ -42,7 +42,6 @@ export async function getShareOfMembershipExceptions(
     );
 
    
-
     return shareOfMembershipExceptions;
   } else {
     const shareOfMembershipExceptions = await directus.request(
@@ -57,9 +56,11 @@ export async function getShareOfMembershipExceptions(
 
 export async function deleteCsaShareOfMembershipException(id: number) {
   const directus = useDirectus();
+
   const deletedException = await directus.request(
     deleteItem("csa_share_of_membership_exception", id)
   );
+
   return deletedException;
 }
 

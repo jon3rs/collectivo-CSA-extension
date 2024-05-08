@@ -24,7 +24,6 @@ const deliveries: Ref<csaShareTile[]> = ref(await getNextDeliveries(5));
 
 const  refreshDeliveries = async () =>{
   deliveries.value = await getNextDeliveries(5);
-  console.log("deliveries:", deliveries.value);
 }
 
 
@@ -32,7 +31,6 @@ const  refreshDeliveries = async () =>{
 onMounted(async () =>{
   getMembershipOwners();
   getMembershipShares();
-  console.log(deliveries.value);
 })
 
 </script>

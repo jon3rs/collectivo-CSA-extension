@@ -42,6 +42,7 @@ declare global {
   interface csaShareType {
     id: number;
     csa_share_type_name: string;
+    csa_share_size: number[];
     delivered_on?: number[];
   }
 
