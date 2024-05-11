@@ -54,6 +54,25 @@ export async function getShareOfMembershipExceptions(
   }
 }
 
+export async function getShareOfMembershipExceptionForDate(shareOfMembershipId: number, date: Date){
+  const directus = useDirectus();
+  console.log("getting exception for date: ", date)
+
+  const exception = await directus.request(readItems("csa_share_of_membership_exception", {filter: {
+    of_share_of_membership: { _eq: shareOfMembershipId },
+    date_of_share_exception: { _eq: date }
+  }}))
+
+  if(exception.length > 1){
+    console.error("Multiple exceptions found for date", date);
+    return;
+  }
+
+  console.log("found exceptions", exception)
+
+  return exception;
+}
+
 export async function deleteCsaShareOfMembershipException(id: number) {
   const directus = useDirectus();
 

@@ -3,10 +3,10 @@ import { getUTCDate } from "./csaUtils";
 
 const directus = useDirectus();
 
-export async function getDefaultPickUpsAmount(
+export async function getDefaultPickUpsOfDepotAndShareSize(
   shareSizeId: number,
   depotId: number
-) {
+): Promise<csaShareOfMembership[]> {
   const result = await directus.request(
     readItems("csa_share_of_membership", {
       filter: {
@@ -20,7 +20,24 @@ export async function getDefaultPickUpsAmount(
     })
   );
 
-  return result.length;
+  return result;
+}
+
+export async function getSharesOfMembershipByShareSize(shareSizeId: number): Promise<csaShareOfMembership[]> {
+  const directus = useDirectus();
+
+  const sharesOfMembership = await directus.request(
+    readItems("csa_share_of_membership", {
+      filter: {
+        of_share_size: {
+          _eq: shareSizeId,
+        },
+      },
+    })
+  );
+
+  return sharesOfMembership;
+
 }
 
 export async function getRecurringShareInstanceExceptionsByShareSize(

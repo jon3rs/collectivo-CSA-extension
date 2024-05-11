@@ -13,9 +13,21 @@ const props = defineProps({
 const nextDelivery: Ref<Date | csaDeliveryCycleException | null> = ref(null);
 const csaDepots: Ref<csaDepot[]> = ref(await getCSADepots());
 const shareSizes: Ref<csaShareSize[]> = ref([]);
-const pickUpsPerDepot: Ref<{csaDepot, csaShareSize, number}[]> = ref([]);
-const exceptionsPerDepot: Ref<{csaDepot, csaShareSize, number}[]> = ref([]);
-const variancePerDepot: Ref<{csaDepot, csaShareSize, number}[]> = ref([]);
+const fetchingData: Ref<boolean> = ref(true);
+
+const grid = computed(() => {
+
+  return `grid grid-cols-${shareSizes.value.length + 1} gap-5`
+})
+
+const pickUpsPerDepot: Ref<
+  {
+    depot: csaDepot;
+    shareSize: csaShareSize;
+    pickUps: (csaShareOfMembership | csaShareOfMembershipException)[];
+  }[]
+> = ref([]);
+
 
 async function getShareSizes() {
   shareSizes.value = [];
@@ -35,102 +47,113 @@ async function getNextDelivery() {
     0,
     new Date()
   );
+
   //what if nextDelivery is exception? →extract Date here already?
-  nextDelivery.value = nextDeliveryCycle;
+  nextDelivery.value = Array.isArray(nextDeliveryCycle)
+    ? nextDeliveryCycle[0]
+    : nextDeliveryCycle;
 }
+
 
 async function getPickUpsPerDepot() {
+  if (nextDelivery.value != null) {
+    const nextDeliveryDate = nextDelivery.value;
+    
+    const incomings: {
+      shareSize: csaShareSize;
+      exception: csaShareOfMembershipException;
+    }[] = [];
 
     await Promise.all(
-    csaDepots.value.map(async (depot) => {
-
-      await Promise.all(
-        shareSizes.value.map(async (shareSize) => {
-          const pickUps = await getDefaultPickUpsAmount(shareSize.id, depot.id);
-
-          pickUpsPerDepot.value.push({
-            depot: depot,
-            shareSize: shareSize,
-            pickUps: pickUps,
-          });
-        })
-      );
-    })
-  );
-
-  pickUpsPerDepot.value.forEach((pickUp) => {
-    console.log("looking for matches: ", pickUp.depot.csa_depot_name, pickUp.shareSize.csa_share_size_name, pickUp.pickUps)
-    const exceptions = exceptionsPerDepot.value.find((exceptions) => exceptions.depot.id === pickUp.depot.id && exceptions.shareSize.id === pickUp.shareSize.id);
-    console.log("exxx",exceptions);
-
-    if(exceptions){
-        console.log("found exceptions: ", exceptions.depot.csa_depot_name, exceptions.shareSize.csa_share_size_name, exceptions.exceptions.length)
-        
-        if(!variancePerDepot.value.find((variance) => variance.depot.id === exceptions.depot && variance.shareSize.id === exceptions.shareSize)){
-            variancePerDepot.value.push({
-                depot: exceptions.depot,
-                shareSize: exceptions.shareSize,
-                variance: -exceptions.exceptions.length,
-            });
-        }else{
-            variancePerDepot.value.find((variance) => variance.depot.id === exceptions.depot && variance.shareSize.id === exceptions.shareSize).variance -= exceptions.exceptions.length;
-        
-        }
-
-        exceptions.exceptions.forEach((exception) => {
-            if(exception.csa_type_of_share_of_membership_exception == 'alternate_depot'){
-                //update corresponding variancePerDepot
-                if(variancePerDepot.value.find((variance) => variance.depot.id === exception.alternate_depot && variance.shareSize.id === exception.csa_share_size)){
-                    variancePerDepot.value.find((variance) => variance.depot.id === exception.alternate_depot && variance.shareSize.id === exception.csa_share_size).variance += 1;
-                }else{
-                    variancePerDepot.value.push({
-                        depot: exception.alternate_depot,
-                        shareSize: exception.csa_share_size,
-                        variance: 1,
-                    })
-                }
-            }
-            console.log("exception: ", exception);
-        })
-
-        pickUp.pickUps -= exceptions.exceptions.length;
-    }
-  })
-}
-
-async function getExceptionsPerDepot() {
-    await Promise.all(
-        csaDepots.value.map(async (depot) => {
+      csaDepots.value.map(async (depot) => {
         await Promise.all(
-            shareSizes.value.map(async (shareSize) => {
-            const exceptions = await getRecurringShareInstanceExceptionsByShareSize(shareSize.id, nextDelivery.value[0], depot.id);
-            
-            exceptionsPerDepot.value.push({
-                depot: depot,
-                shareSize: shareSize,
-                exceptions: exceptions,
+          shareSizes.value.map(async (shareSize) => {
+            const pickUps = await getDefaultPickUpsOfDepotAndShareSize(
+              shareSize.id,
+              depot.id
+            );
+
+            await Promise.all(
+              pickUps.map(
+                async (
+                  shareOfMembership: csaShareOfMembership,
+                  index: number
+                ) => {
+                  const exceptions = await getShareOfMembershipExceptionForDate(
+                    shareOfMembership.id,
+                    getUTCDate(nextDeliveryDate)
+                  );
+
+                  if (exceptions && exceptions.length > 0) {
+                    pickUps[index] = exceptions[0];
+
+                    if (
+                      exceptions[0].csa_type_of_share_of_membership_exception ==
+                      "alternate_depot"
+                    ) {
+                      incomings.push({ shareSize, exception: exceptions[0] });
+                    }
+                  }
+                }
+              )
+            );
+
+            pickUpsPerDepot.value.push({
+              depot: depot,
+              shareSize: shareSize,
+              pickUps: pickUps,
             });
-            })
+          })
         );
-        })
+      })
     );
+
+    incomings.forEach((incoming) => {
+      pickUpsPerDepot.value
+        .find(
+          (pickUp) =>
+            pickUp.depot.id === incoming.exception.alternate_depot &&
+            pickUp.shareSize.id === incoming.shareSize.id
+        )
+        .pickUps.push(incoming.exception);
+    });
+  } else {
+    console.log("nextDelivery is null", nextDelivery.value);
+  }
 }
 
-function getPickUpsAmount(depotId: number, shareSizeId: number){
-    const pickUps = pickUpsPerDepot.value.find(pickUp => pickUp.depot.id === depotId && pickUp.shareSize.id === shareSizeId);
-    return pickUps ? pickUps.pickUps : 0;
+
+function hasCancelledPickUps(depotId: number, shareSizeId: number) {
+  console.log("looking for cancelled", pickUpsPerDepot.value);
+  let cancelledPickUps: csaShareOfMembershipException[] = [];
+  if (fetchingData.value) return cancelledPickUps;
+
+  if (pickUpsPerDepot.value != undefined) {
+    const relevantPickUps = pickUpsPerDepot.value.find(
+      (pickUps) =>
+        pickUps.depot.id === depotId && pickUps.shareSize.id === shareSizeId
+    );
+
+    cancelledPickUps = relevantPickUps
+      ? relevantPickUps.pickUps.find(
+          (pickUp) =>
+            instanceOfCsaShareOfMembershipException(pickUp) &&
+            pickUp.csa_type_of_share_of_membership_exception == "cancelled"
+        )
+      : [];
+  }
+
+  console.log("cancelledPickUps", cancelledPickUps);
+  return cancelledPickUps;
 }
 
 onMounted(async () => {
   await getNextDelivery();
   await getShareSizes();
-  await getExceptionsPerDepot();
+  //await getSharesOfMemberships();
   await getPickUpsPerDepot();
-  console.log("PickUpsPerDepot: ", pickUpsPerDepot);
-  exceptionsPerDepot.value.forEach((exception) => {
-    console.log("ExceptionsPerDepot: ", exception.depot.csa_depot_name, exception.shareSize.csa_share_size_name, exception.exceptions.length);
-  })
-    console.log("ExceptionsPerDepot: ", exceptionsPerDepot.value);
+  console.log("setting fetchingData to false", shareSizes.value, grid.value)
+  fetchingData.value = false;
 });
 </script>
 
@@ -139,8 +162,8 @@ onMounted(async () => {
     nächste Lieferung vom Lieferzyklus
     {{ deliveryCycle.name_of_delivery_cycle }} am
     {{ formatDate(nextDelivery) }}:
-    <div class="">
-      <div class="grid grid-cols-3 gap-3">
+    <div v-if="!fetchingData">
+      <div :class="`mb-3  ${grid}`" >
         <div>Größe</div>
         <div v-for="shareSize in shareSizes" :key="shareSize.id">
           {{ shareSize.csa_share_size_name }}
@@ -149,13 +172,31 @@ onMounted(async () => {
       <div
         v-for="depot in csaDepots"
         :key="depot.id"
-        class="grid grid-cols-3 gap-3"
+        :class="`mb-3 depotRows ${grid}`" 
       >
         <div>{{ depot.csa_depot_name }}</div>
         <div v-for="shareSize in shareSizes" :key="shareSize.id">
-            {{ getPickUpsAmount(depot.id, shareSize.id) }} <span class="text-red-700" v-if="variancePerDepot.find((variance) => variance.depot.id === depot.id && variance.shareSize.id === shareSize.id)"> {{ variancePerDepot.find((variance) => variance.depot.id === depot.id && variance.shareSize.id === shareSize.id).variance }}</span>
+            <CSAPickUps
+              v-if="!fetchingData"
+              :pickUps="
+                pickUpsPerDepot.find(
+                  (pickUp) =>
+                    pickUp.depot.id === depot.id &&
+                    pickUp.shareSize.id === shareSize.id
+                ).pickUps
+              "
+              :depotId="depot.id"
+            />
+            <div v-else>still fetching</div>
         </div>
       </div>
     </div>
   </div>
 </template>
+
+
+<style scoped lang="scss">
+.depotRows:nth-child(even){
+  @apply bg-white;
+}
+</style>

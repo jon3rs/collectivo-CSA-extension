@@ -19,6 +19,7 @@ export function formatDate(date: Date): string {
 
 export function getUTCDate(date: Date): Date {
   if(date instanceof Date){
+    console.log("issa date")
     return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
   }
   
@@ -69,16 +70,20 @@ export function instanceOfCsaDeliveryCycleException(object: any): object is csaD
   return 'type_of_exception' in object;
 }
 
+export function instanceOfCsaShareOfMembership(object:any): object is csaShareOfMembershipException {
+  return 'of_membership' in object;
+}
+
 export function getDeliveryDate(delivery: csaDeliveryCycleException |csaShareOfMembershipException | Date): Date {
 
 
-  if (delivery instanceof Date) {
-    return delivery;
-  } else if (instanceOfCsaDeliveryCycleException(delivery)) {
-    return new Date(delivery.original_delivery_date);
+  if (instanceOfCsaDeliveryCycleException(delivery)) {
+    delivery =  new Date(delivery.original_delivery_date);
   } else if (instanceOfCsaShareOfMembershipException(delivery)) {
-    return new Date(delivery.date_of_share_exception);
+    delivery =  new Date(delivery.date_of_share_exception);
   }
+
+  return delivery;
 }
 
 export async function getNextDeliveries(limit: number = 3): Promise<csaShareTile[]> {
@@ -218,7 +223,7 @@ export async function getDeliveryCycleActualDeliveries(
   limit = 10,
   offset = 0,
   firstDeliveryDate: Date = new Date(deliveryCycle.date_of_first_delivery)
-) {
+): Promise<(Date | csaDeliveryCycleException)[]|(Date | csaDeliveryCycleException)>{
   let additionalDeliveries: csaDeliveryCycleException[] =
     await getAdditionalDeliveryExceptionsOfDeliveryCycle(deliveryCycle.id);
 
@@ -244,7 +249,7 @@ export async function getDeliveryCycleActualDeliveries(
   let nextDeliveryDate: Date;
 
   if (
-    new Date(deliveryCycle.date_of_first_delivery).getDay() !==
+    firstDeliveryDate.getDay() !==
       deliveryCycle.repeats_on &&
     deliveryCycle.repeats_on
   ) {
@@ -263,6 +268,7 @@ export async function getDeliveryCycleActualDeliveries(
   if(counter ==0 && calculateAdjacentDelivery(firstDeliveryDate, 0, deliveryCycle)< currentDate.setDate(currentDate.getDate() - 1)){
     currentDate = calculateAdjacentDelivery(firstDeliveryDate, 1, deliveryCycle);
     counter++;
+    limit++;
   }else{
     currentDate = calculateAdjacentDelivery(firstDeliveryDate, 0, deliveryCycle);
   }
@@ -380,6 +386,13 @@ export async function getDeliveryCycleActualDeliveries(
       break;
     }
   }
+
+  if(limit == 1){
+    console.log("actualll: ", limit,typeof actualDeliveryDates[0], actualDeliveryDates[0])
+    return actualDeliveryDates[0];
+  }
+
+  console.log("actualll array?: ", limit ,typeof actualDeliveryDates, actualDeliveryDates)
 
   return actualDeliveryDates;
 }
