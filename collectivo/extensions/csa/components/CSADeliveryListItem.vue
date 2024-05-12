@@ -53,9 +53,9 @@ async function addAlternateDepotException(depot: number) {
 
 async function suspendDelivery(){
   if(instanceOfCsaShareOfMembershipException(props.delivery) && props.delivery.csa_type_of_share_of_membership_exception == 'alternate_depot'){
-    await updateShareOfMembershipException(props.delivery.id, 'suspended', null);
+    await updateShareOfMembershipException(props.delivery.id, 'suspend', null);
   }else if(date instanceof Date && props.shareOfMembershipId) {
-    await createShareOfMembershipException(props.shareOfMembershipId, date, 'suspended');
+    await createShareOfMembershipException(props.shareOfMembershipId, date, 'suspend');
   }
   
   emit("refreshDeliveries");

@@ -16,7 +16,6 @@ const incomingPickUps: Ref<number> = ref(0);
 const outgoingPickUps: Ref<number> = ref(0);
 
 onMounted(()=>{
-    console.log("pickUps",props.pickUps);
 
     props.pickUps.forEach((pickUp)=>{
         if(instanceOfCsaShareOfMembershipException(pickUp)){
@@ -27,7 +26,7 @@ onMounted(()=>{
                 }else{
                     outgoingPickUps.value++;
                 }
-            }else if(pickUp.csa_type_of_share_of_membership_exception === 'suspended'){
+            }else if(pickUp.csa_type_of_share_of_membership_exception === 'suspend'){
                 cancelledPickUps.value++;
             }
         }else if(instanceOfCsaShareOfMembership(pickUp)){
@@ -39,21 +38,23 @@ onMounted(()=>{
 </script>
 
 <template>
-<div class="flex justify-between">
-    <div>{{ actualPickUps }}</div>
-    <div class="variance">
-        <p v-if="cancelledPickUps != 0">- {{ cancelledPickUps }}</p>
-        <p v-if="outgoingPickUps != 0">- {{ outgoingPickUps }}</p>
-        <p v-if="incomingPickUps != 0" class="text-green-600">+ {{ incomingPickUps }}</p>
+<div class="flex items-center">
+    <div> <p> {{ actualPickUps }}</p></div>
+    <div class="variance ml-2">
+        <p v-if="cancelledPickUps != 0"><UIcon name="i-heroicons-no-symbol"/> {{ cancelledPickUps }}</p>
+        <p v-if="outgoingPickUps != 0"><UIcon name="i-heroicons-arrow-right"/> {{ outgoingPickUps }}</p>
+        <p v-if="incomingPickUps != 0" class="text-green-600"><UIcon name="i-heroicons-arrow-left"/> {{ incomingPickUps }}</p>
     </div>
 </div>
 </template>
 
 <style scoped lang="scss">
 .variance{
-    @apply block text-red-600 text-xs text-right;
+    @apply block text-red-600  text-right;
     p{
-        @apply mb-0 leading-4;
+        @apply mb-0 leading-4 flex items-center;
+        font-size: .75rem;
+
     }
 }
 </style>

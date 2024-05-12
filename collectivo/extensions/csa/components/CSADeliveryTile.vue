@@ -124,11 +124,11 @@ async function addAlternateDepotException(depot: number) {
 
 async function suspendDelivery(){
   if(instanceOfCsaShareOfMembershipException(props.delivery)){
-    await updateShareOfMembershipException(props.delivery.id, 'suspended', null);
+    await updateShareOfMembershipException(props.delivery.id, 'suspend', null);
   }else if (instanceOfCsaDeliveryCycleException(props.delivery)){
-    await createShareOfMembershipException(props.shareOfMembershipId, props.delivery.original_delivery_date, 'suspended');
+    await createShareOfMembershipException(props.shareOfMembershipId, props.delivery.original_delivery_date, 'suspend');
   }else if(props.delivery instanceof Date && props.shareOfMembershipId) {
-    await createShareOfMembershipException(props.shareOfMembershipId, props.delivery, 'suspended');
+    await createShareOfMembershipException(props.shareOfMembershipId, props.delivery, 'suspend');
   }
   
   emit("refreshDeliveries");
@@ -169,7 +169,7 @@ onMounted(async () => {
     class="relative p-2 bg-white rounded my-2 -mx-4"
     :class="
       instanceOfCsaDeliveryCycleException(delivery) &&
-      delivery.type_of_exception == 'cancelled' || instanceOfCsaShareOfMembershipException(delivery) && delivery.csa_type_of_share_of_membership_exception == 'suspended'
+      delivery.type_of_exception == 'cancelled' || instanceOfCsaShareOfMembershipException(delivery) && delivery.csa_type_of_share_of_membership_exception == 'suspend'
         ? 'text-slate-400 italic'
         : ''
     "
@@ -227,8 +227,8 @@ onMounted(async () => {
       "
       class="mt-2"
     >
-      <UButton @click="toggleDepotForm()" :disabled="(instanceOfCsaShareOfMembershipException(delivery) && delivery.csa_type_of_share_of_membership_exception == 'suspended')">Depot wechseln</UButton>
-      <UButton v-if="!(instanceOfCsaShareOfMembershipException(delivery) && delivery.csa_type_of_share_of_membership_exception == 'suspended')" @click="suspendDelivery()" class="ml-2" >aussetzen</UButton>
+      <UButton @click="toggleDepotForm()" :disabled="(instanceOfCsaShareOfMembershipException(delivery) && delivery.csa_type_of_share_of_membership_exception == 'suspend')">Depot wechseln</UButton>
+      <UButton v-if="!(instanceOfCsaShareOfMembershipException(delivery) && delivery.csa_type_of_share_of_membership_exception == 'suspend')" @click="suspendDelivery()" class="ml-2" >aussetzen</UButton>
       <UButton v-else @click="deleteException()" class="ml-2" >zurücksetzen</UButton>
       <FormRadioGroup
         v-if="depotForm"

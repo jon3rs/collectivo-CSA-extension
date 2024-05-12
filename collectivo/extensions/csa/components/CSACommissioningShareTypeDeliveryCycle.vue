@@ -15,9 +15,17 @@ const csaDepots: Ref<csaDepot[]> = ref(await getCSADepots());
 const shareSizes: Ref<csaShareSize[]> = ref([]);
 const fetchingData: Ref<boolean> = ref(true);
 
-const grid = computed(() => {
+const gridClasses: Record<number, string> = {
+  2: "grid-cols-2",
+  3: "grid-cols-3",
+  4: "grid-cols-4",
+  5: "grid-cols-5",
+  6: "grid-cols-6",
 
-  return `grid grid-cols-${shareSizes.value.length + 1} gap-5`
+}
+
+const grid = computed(() => {
+  return gridClasses[shareSizes.value.length + 1];
 })
 
 const pickUpsPerDepot: Ref<
@@ -109,61 +117,47 @@ async function getPickUpsPerDepot() {
     );
 
     incomings.forEach((incoming) => {
-      pickUpsPerDepot.value
-        .find(
-          (pickUp) =>
-            pickUp.depot.id === incoming.exception.alternate_depot &&
-            pickUp.shareSize.id === incoming.shareSize.id
-        )
-        .pickUps.push(incoming.exception);
+      const pickUpsPerDepotIndex = pickUpsPerDepot.value.findIndex(
+        (pickUp) =>
+          pickUp.depot.id === incoming.exception.alternate_depot &&
+          pickUp.shareSize.id === incoming.shareSize.id
+      );
+
+      pickUpsPerDepot.value[pickUpsPerDepotIndex].pickUps.push(
+        incoming.exception
+      );
+      
     });
-  } else {
-    console.log("nextDelivery is null", nextDelivery.value);
-  }
+  } 
+}
+
+function getPickUps(depotId: number, shareSizeId: number) {
+  const pickUpsIndex = pickUpsPerDepot.value.findIndex(
+    (pickUp) =>
+      pickUp.depot.id === depotId && pickUp.shareSize.id === shareSizeId
+  );
+  
+  return pickUpsPerDepot.value[pickUpsIndex].pickUps;
 }
 
 
-function hasCancelledPickUps(depotId: number, shareSizeId: number) {
-  console.log("looking for cancelled", pickUpsPerDepot.value);
-  let cancelledPickUps: csaShareOfMembershipException[] = [];
-  if (fetchingData.value) return cancelledPickUps;
-
-  if (pickUpsPerDepot.value != undefined) {
-    const relevantPickUps = pickUpsPerDepot.value.find(
-      (pickUps) =>
-        pickUps.depot.id === depotId && pickUps.shareSize.id === shareSizeId
-    );
-
-    cancelledPickUps = relevantPickUps
-      ? relevantPickUps.pickUps.find(
-          (pickUp) =>
-            instanceOfCsaShareOfMembershipException(pickUp) &&
-            pickUp.csa_type_of_share_of_membership_exception == "cancelled"
-        )
-      : [];
-  }
-
-  console.log("cancelledPickUps", cancelledPickUps);
-  return cancelledPickUps;
-}
 
 onMounted(async () => {
   await getNextDelivery();
   await getShareSizes();
-  //await getSharesOfMemberships();
   await getPickUpsPerDepot();
-  console.log("setting fetchingData to false", shareSizes.value, grid.value)
+  console.log("finished fetching data", fetchingData.value)
   fetchingData.value = false;
 });
 </script>
 
 <template>
-  <div>
+  <div v-if="!fetchingData">
     nächste Lieferung vom Lieferzyklus
     {{ deliveryCycle.name_of_delivery_cycle }} am
     {{ formatDate(nextDelivery) }}:
-    <div v-if="!fetchingData">
-      <div :class="`mb-3  ${grid}`" >
+    <div >
+      <div :class="` depotRows grid gap-5 ${grid}`"   >
         <div>Größe</div>
         <div v-for="shareSize in shareSizes" :key="shareSize.id">
           {{ shareSize.csa_share_size_name }}
@@ -172,22 +166,23 @@ onMounted(async () => {
       <div
         v-for="depot in csaDepots"
         :key="depot.id"
-        :class="`mb-3 depotRows ${grid}`" 
+        :class="` depotRows grid gap-5 ${grid}`" 
       >
         <div>{{ depot.csa_depot_name }}</div>
         <div v-for="shareSize in shareSizes" :key="shareSize.id">
             <CSAPickUps
-              v-if="!fetchingData"
-              :pickUps="
-                pickUpsPerDepot.find(
-                  (pickUp) =>
-                    pickUp.depot.id === depot.id &&
-                    pickUp.shareSize.id === shareSize.id
-                ).pickUps
-              "
+              v-if="!fetchingData "
+              :pickUps="getPickUps(depot.id, shareSize.id) "
               :depotId="depot.id"
             />
             <div v-else>still fetching</div>
+        </div>
+      </div>
+      <hr />
+      <div :class="`depotRows grid gap-5 ${grid}`">
+        <div>gesamt:</div>
+        <div v-for="shareSize in shareSizes" :key="shareSize.id">
+          0
         </div>
       </div>
     </div>
