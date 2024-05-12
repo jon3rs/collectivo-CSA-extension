@@ -16,7 +16,7 @@ export default async function examples() {
   );
 
   await directus.request(deleteItems("csa_depot", { limit: 1000 }));
-  await directus.request(deleteItems("collectivo_tiles", { limit: 1000 }));
+  //await directus.request(deleteItems("collectivo_tiles", { limit: 1000 }));
 
   // Create some users
 /*   console.info("Creating users");
@@ -172,7 +172,7 @@ export default async function examples() {
     }
   }
  */
-  try {
+ /*  try {
     await directus.request(
       createItem("collectivo_tiles", {
         tiles_name: "nächste Anteil",
@@ -192,7 +192,7 @@ export default async function examples() {
     console.info("created csaTile");
   } catch (error) {
     console.info(error);
-  }
+  } */
 
   //create example data for csa_delivery
 

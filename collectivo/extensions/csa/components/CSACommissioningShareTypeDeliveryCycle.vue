@@ -140,6 +140,32 @@ function getPickUps(depotId: number, shareSizeId: number) {
   return pickUpsPerDepot.value[pickUpsIndex].pickUps;
 }
 
+function getActualPickUpsPerShareSize(shareSizeId: number){
+  let cancelledPickUps = 0;
+  let alternateDepots = 0;
+  let actualPickUps = 0;
+  const pickUps = pickUpsPerDepot.value.filter((pickUp) => pickUp.shareSize.id === shareSizeId);
+  
+  pickUps.forEach((entry)=>{
+    entry.pickUps.forEach((pickUp)=>{
+      if(instanceOfCsaShareOfMembershipException(pickUp)){
+        if(pickUp.csa_type_of_share_of_membership_exception === 'alternate_depot'){
+          alternateDepots++;
+        }else if(pickUp.csa_type_of_share_of_membership_exception === 'suspend'){
+          cancelledPickUps++;
+        }
+      }else if(instanceOfCsaShareOfMembership(pickUp)){
+        actualPickUps++;
+      }
+    })
+  })
+
+  console.log("shareSize: ", shareSizeId, "pickUps actual:", actualPickUps, "cancelled:", cancelledPickUps, "alternate:", alternateDepots)
+  actualPickUps = actualPickUps + alternateDepots*.5;
+  let total = actualPickUps+cancelledPickUps;
+  return {actual: actualPickUps, total: total};
+}
+
 
 
 onMounted(async () => {
@@ -182,7 +208,7 @@ onMounted(async () => {
       <div :class="`depotRows grid gap-5 ${grid}`">
         <div>gesamt:</div>
         <div v-for="shareSize in shareSizes" :key="shareSize.id">
-          0
+          {{ getActualPickUpsPerShareSize(shareSize.id).actual }} <span class="text-slate-400"> /{{ getActualPickUpsPerShareSize(shareSize.id).total}}</span>
         </div>
       </div>
     </div>
