@@ -56,6 +56,8 @@ async function getNextDelivery() {
     new Date()
   );
 
+  console.log("nextDeliveryCycle", nextDeliveryCycle)
+
   //what if nextDelivery is exception? →extract Date here already?
   nextDelivery.value = Array.isArray(nextDeliveryCycle)
     ? nextDeliveryCycle[0]
@@ -162,7 +164,7 @@ function getActualPickUpsPerShareSize(shareSizeId: number){
 
   console.log("shareSize: ", shareSizeId, "pickUps actual:", actualPickUps, "cancelled:", cancelledPickUps, "alternate:", alternateDepots)
   actualPickUps = actualPickUps + alternateDepots*.5;
-  let total = actualPickUps+cancelledPickUps;
+  const total = actualPickUps+cancelledPickUps;
   return {actual: actualPickUps, total: total};
 }
 

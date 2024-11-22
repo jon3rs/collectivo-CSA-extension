@@ -247,12 +247,15 @@ export async function getDeliveryCycleActualDeliveries(
   let addRemainingAdditionals = false;
   // todo: outsource the whole firstDateCalculation into a separate function
   let nextDeliveryDate: Date;
+console.log("checking if equal: ", firstDeliveryDate  , deliveryCycle.repeats_on)
 
-  if (
+if (
     firstDeliveryDate.getDay() !==
       deliveryCycle.repeats_on &&
     deliveryCycle.repeats_on
   ) {
+    console.log("not equal")
+
     firstDeliveryDate.setDate(
       firstDeliveryDate.getDate() +
         ((deliveryCycle.repeats_on - firstDeliveryDate.getDay() + 7) % 7)
@@ -264,13 +267,19 @@ export async function getDeliveryCycleActualDeliveries(
 
   let currentDate = firstDeliveryDate;
   let counter = 0;
+  const initialLimit = limit;
 
-  if(counter ==0 && calculateAdjacentDelivery(firstDeliveryDate, 0, deliveryCycle)< currentDate.setDate(currentDate.getDate() - 1)){
+  console.log("current Date: ",currentDate)
+
+  if(counter ==0 && calculateAdjacentDelivery(firstDeliveryDate, 0, deliveryCycle)< new Date(currentDate.getDate() - 1)){
     currentDate = calculateAdjacentDelivery(firstDeliveryDate, 1, deliveryCycle);
     counter++;
     limit++;
   }else{
+    console.log("before 2nd calculate: ", firstDeliveryDate, currentDate)
     currentDate = calculateAdjacentDelivery(firstDeliveryDate, 0, deliveryCycle);
+    console.log("after 2nd calculate: ", firstDeliveryDate, currentDate)
+
   }
 
   if (offset > 0) {
@@ -280,6 +289,8 @@ export async function getDeliveryCycleActualDeliveries(
       deliveryCycle
     );
   }
+
+  console.log("currentDate2: ", currentDate)
 
   let actualDeliveryDates: (Date | csaDeliveryCycleException)[] = [];
 
@@ -387,7 +398,7 @@ export async function getDeliveryCycleActualDeliveries(
     }
   }
 
-  if(limit == 1){
+  if(initialLimit == 1){
     console.log("actualll: ", limit,typeof actualDeliveryDates[0], actualDeliveryDates[0])
     return actualDeliveryDates[0];
   }
@@ -416,13 +427,14 @@ export function calculateAdjacentDelivery(
 
   switch (deliveryCycle.interval_of_delivery_cycle) {
     case "weekly":
+      console.log("date to be processed: ", date)
       dateToReturn = new Date(date);
 
       dateToReturn = new Date(
         dateToReturn.setDate(dateToReturn.getDate() + 7 * offsetAmount)
       );
-
-      return dateToReturn;
+      console.log("date to be returned: ", dateToReturn)
+      return getUTCDate(dateToReturn);
     case "biweekly":
       dateToReturn = new Date(date);
 
@@ -430,7 +442,7 @@ export function calculateAdjacentDelivery(
         dateToReturn.setDate(dateToReturn.getDate() + 14 * offsetAmount)
       );
 
-      return dateToReturn;
+      return getUTCDate(dateToReturn);
     case "first_of_month":
       dateToReturn = calculateNthDeliveryOfMonth(
         date,
@@ -439,7 +451,7 @@ export function calculateAdjacentDelivery(
         offsetAmount
       );
 
-      return dateToReturn;
+      return getUTCDate(dateToReturn);
     case "second_of_month":
       dateToReturn = calculateNthDeliveryOfMonth(
         date,
@@ -448,7 +460,7 @@ export function calculateAdjacentDelivery(
         offsetAmount
       );
 
-      return dateToReturn;
+      return getUTCDate(dateToReturn);
     case "third_of_month":
       dateToReturn = calculateNthDeliveryOfMonth(
         date,
@@ -457,10 +469,10 @@ export function calculateAdjacentDelivery(
         offsetAmount
       );
 
-      return dateToReturn;
+      return getUTCDate(dateToReturn);
     case "last_of_month":
       dateToReturn = calculateLastOfMonth(date, weekday, offsetAmount);
-      return dateToReturn;
+      return getUTCDate(dateToReturn);
   }
 
   //return dateToReturn;

@@ -172,7 +172,7 @@ export default async function examples() {
     }
   }
  */
- /*  try {
+  try {
     await directus.request(
       createItem("collectivo_tiles", {
         tiles_name: "nächste Anteil",
@@ -192,7 +192,7 @@ export default async function examples() {
     console.info("created csaTile");
   } catch (error) {
     console.info(error);
-  } */
+  }
 
   //create example data for csa_delivery
 
