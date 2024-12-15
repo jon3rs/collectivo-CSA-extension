@@ -1,0 +1,27 @@
+const schema = initSchema("com_commissioning", "0.0.1");
+
+export default schema;
+
+schema.collections = [
+  {
+    collection: "com_commissioning",
+    meta: {
+      group: "collectivo_csa_commissioning",
+      color: "#00ff80",
+      icon: "local_florist",
+    },
+  },
+];
+
+schema.fields = [
+  ...directusSystemFields("com_commissioning"),
+  {
+    collection: "com_commissioning",
+    field: "com_harvest",
+    meta: {
+      interface: "list-o2m",
+      special: ["o2m"],
+    },
+    type: "alias",
+  },
+];
