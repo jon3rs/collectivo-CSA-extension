@@ -76,6 +76,15 @@ schema.fields = [
     },
     type: "integer",
   },
+  {
+    collection: "com_harvest_item",
+    field: "distributed_partial_harvest_item",
+    meta: {
+      interface: "list-o2m",
+      special: ["o2m"],
+    },
+    type: "alias",
+  },
 ];
 
 schema.relations = [
@@ -92,7 +101,7 @@ schema.relations = [
     field: "items_unit",
     related_collection: "com_unit",
     schema: {
-      on_delete: "SET NULL", //or no action?
+      on_delete: "SET NULL",
     },
   },
   {

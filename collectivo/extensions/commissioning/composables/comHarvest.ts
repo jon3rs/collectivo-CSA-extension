@@ -80,3 +80,72 @@ export async function getHarvestItem(
 
   return result as HarvestItem;
 }
+
+export async function getPartialDistributedHarvestItemsOfCommissioning(
+  commissioningId: number
+): Promise<distributedPartialHarvestItem[]> {
+  const directus = useDirectus();
+
+  const result = await directus.request(
+    readItems("com_distributed_partial_harvest_item", {
+      filter: {
+        of_commissioning: commissioningId,
+      },
+    })
+  );
+
+  return result as distributedPartialHarvestItem[];
+}
+
+export async function createPartialDistributedHarvestItem(
+  distributedPartialHarvestItem: distributedPartialHarvestItem
+): Promise<distributedPartialHarvestItem> {
+  const directus = useDirectus();
+
+  const result = await directus.request(
+    createItem(
+      "com_distributed_partial_harvest_item",
+      distributedPartialHarvestItem
+    )
+  );
+
+  return result as distributedPartialHarvestItem;
+}
+
+export async function updatePartialDistributedHarvestItem(
+  distributedPartialHarvestItem: distributedPartialHarvestItem
+): Promise<distributedPartialHarvestItem> {
+  const directus = useDirectus();
+
+  const result = await directus.request(
+    updateItem(
+      "com_distributed_partial_harvest_item",
+      distributedPartialHarvestItem.id,
+      distributedPartialHarvestItem
+    )
+  );
+
+  return result as distributedPartialHarvestItem;
+}
+
+export async function getHarvestOfCommissioning(
+  commissioningId: number
+): Promise<Harvest | null> {
+  const directus = useDirectus();
+
+  const result = await directus.request(
+    readItems("com_harvest", {
+      filter: {
+        harvests_commissioning: commissioningId,
+      },
+    })
+  );
+
+  if (result.length === 0) {
+    return null;
+  } else if (result.length > 1) {
+    throw new Error("More than one harvest found for this commissioning");
+  }
+
+  return result[0] as Harvest;
+}

@@ -9,8 +9,8 @@ schema.collections = [
       group: "collectivo_csa_commissioning",
       color: "#00ff80",
       icon: "nest_eco_leaf",
-      singleton: false,
     },
+    schema: {},
   },
 ];
 
@@ -29,7 +29,7 @@ schema.fields = [
   },
   {
     collection: "com_harvest",
-    field: "com_harvest_item", //s?
+    field: "com_harvest_item",
     meta: {
       interface: "list-o2m",
       special: ["o2m"],
@@ -64,7 +64,7 @@ schema.relations = [
     collection: "com_harvest",
     field: "harvests_commissioning",
     meta: {
-      one_field: "com_harvest",
+      one_field: "com_related_harvest",
     },
     related_collection: "com_commissioning",
     schema: {
