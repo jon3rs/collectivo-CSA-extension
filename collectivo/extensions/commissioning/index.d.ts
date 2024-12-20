@@ -67,6 +67,11 @@ declare global {
     members_amount: number;
     of_commissioning: number;
   }
+
+  interface PackingList {
+    nameOfPackingList: string;
+    packingList: number | string | null[][];
+  }
 }
 
 export {};

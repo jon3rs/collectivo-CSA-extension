@@ -13,6 +13,8 @@ const units = ref(await getUnits());
 const shareSizeGroups = ref(await getShareSizeGroups());
 const activeHarvestItem = ref<number | null>(null);
 const amountsPerMembergroup = ref<AmountPerGroup[][]>([[]]);
+//const packingLists = ref<PackingList[]>([]); // one more dimension to add for depots
+const packingLists = ref<Map<number, PackingList>>(new Map());
 
 const distributedPartialHarvestItems = ref<distributedPartialHarvestItem[]>(
   await getPartialDistributedHarvestItemsOfCommissioning(route.params.id)
@@ -25,6 +27,68 @@ const distributionMatrix = ref<Partial<distributedPartialHarvestItem>[][][]>(
 const memberGroups = ref(
   await getMemberGroupsForCommissioning(route.params.id)
 );
+
+/* const getPackingLists */
+
+const getPackingList = async (shareSizeGroup: shareSizeGroup) => {
+  const shareSizes = await getShareSizesOfGroup(shareSizeGroup.id);
+  const harvestItems = harvest.value.com_harvest_item;
+  let packingList = [];
+
+  for (let column = 0; column < shareSizes.length + 2; column++) {
+    packingList[column] = new Array(harvestItems.length + 2);
+  }
+
+  shareSizes.forEach((shareSize, index) => {
+    packingList[index + 1][0] = shareSize.name_of_share_size;
+
+    //also filter for depot here in the future
+    const memberGroupsOfShareSize = memberGroups.value.filter(
+      (group: comMemberGroup) => group.share_size == shareSize.id
+    );
+
+    if (memberGroupsOfShareSize.length > 1) {
+      console.error("More than one member group for share size", shareSize);
+      return;
+    } else if (memberGroupsOfShareSize.length == 0) {
+      console.error("No member group for share size", shareSize);
+      return;
+    }
+
+    const partiallyDistributedHarvestItems =
+      distributedPartialHarvestItems.value.filter(
+        (item) => item.member_group == memberGroupsOfShareSize[0].id
+      );
+
+    harvestItems.forEach((harvestItem, harvestItemIndex) => {
+      const distributedItem = partiallyDistributedHarvestItems.find(
+        (item) => item.harvest_item == harvestItem.id
+      );
+
+      packingList[index + 1][harvestItemIndex + 1] =
+        distributedItem?.amount_per_member || null;
+    });
+  });
+
+  harvestItems.forEach((harvestItem, index) => {
+    packingList[0][index + 1] = crops.value.find(
+      (crop) => crop.id == harvestItem.harvested_crop
+    )?.name_of_crop;
+
+    packingList[packingList.length - 1][index + 1] = units.value.find(
+      (unit) => unit.id == harvestItem.items_unit
+    )?.name_of_unit;
+  });
+
+  //console.log("shareSizes", shareSizes);
+  //console.log("harvestItems", harvestItems);
+  console.log("packingList", packingList);
+
+  return {
+    nameOfPackingList: "KWWWWWWW",
+    packingList: packingList,
+  };
+};
 
 const populateDistributionMatrix = () => {
   distributionMatrix.value = shareSizeGroups.value.map((group) => {
@@ -103,6 +167,13 @@ onMounted(async () => {
   await loadHarvestItems();
   await loadDistributedPartialHarvestItems();
   populateDistributionMatrix();
+
+  for (const group of shareSizeGroups.value) {
+    const list = await getPackingList(group);
+    packingLists.value.set(group.id, list);
+  }
+
+  console.log("packingLists", packingLists);
 });
 
 function setActiveHarvestItem(id: number) {
@@ -341,6 +412,9 @@ watch(activeHarvestItem, (value) => {
           <UButton @click="saveDistribution()">Verteilung speichern</UButton>
         </div>
       </div>
+      <PackingListPrinter
+        :packing-list="packingLists.get(shareSizeGroup.id)"
+      ></PackingListPrinter>
     </div>
   </div>
 </template>
