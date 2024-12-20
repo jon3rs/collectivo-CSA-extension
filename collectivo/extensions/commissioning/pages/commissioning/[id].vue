@@ -16,6 +16,10 @@ const amountsPerMembergroup = ref<AmountPerGroup[][]>([[]]);
 //const packingLists = ref<PackingList[]>([]); // one more dimension to add for depots
 const packingLists = ref<Map<number, PackingList>>(new Map());
 
+const packingListToggled = ref<boolean[]>([]);
+const initialPackingNotes = ref<string>(await getPackingNotes(route.params.id));
+const packingNotes = ref<string>(initialPackingNotes.value);
+
 const distributedPartialHarvestItems = ref<distributedPartialHarvestItem[]>(
   await getPartialDistributedHarvestItemsOfCommissioning(route.params.id)
 );
@@ -35,6 +39,7 @@ const getPackingList = async (shareSizeGroup: shareSizeGroup) => {
   const harvestItems = harvest.value.com_harvest_item;
   let packingList = [];
 
+  // Initialize packing list with empty values
   for (let column = 0; column < shareSizes.length + 2; column++) {
     packingList[column] = new Array(harvestItems.length + 2);
   }
@@ -55,21 +60,27 @@ const getPackingList = async (shareSizeGroup: shareSizeGroup) => {
       return;
     }
 
-    const partiallyDistributedHarvestItems =
+    const partiallyDistributedHarvestItemsOfGroup =
       distributedPartialHarvestItems.value.filter(
         (item) => item.member_group == memberGroupsOfShareSize[0].id
       );
 
     harvestItems.forEach((harvestItem, harvestItemIndex) => {
-      const distributedItem = partiallyDistributedHarvestItems.find(
+      const distributedItem = partiallyDistributedHarvestItemsOfGroup.find(
         (item) => item.harvest_item == harvestItem.id
       );
 
       packingList[index + 1][harvestItemIndex + 1] =
         distributedItem?.amount_per_member || null;
     });
+
+    packingList[index + 1][packingList[0].length - 1] =
+      memberGroupsOfShareSize[0].amount;
   });
 
+  packingList[0][packingList[0].length - 1] = "gesamt: ";
+
+  // fill in harvest items name and unit
   harvestItems.forEach((harvestItem, index) => {
     packingList[0][index + 1] = crops.value.find(
       (crop) => crop.id == harvestItem.harvested_crop
@@ -85,7 +96,7 @@ const getPackingList = async (shareSizeGroup: shareSizeGroup) => {
   console.log("packingList", packingList);
 
   return {
-    nameOfPackingList: "KWWWWWWW",
+    nameOfPackingList: "Packliste für " + harvest.value.name_of_harvest,
     packingList: packingList,
   };
 };
@@ -160,6 +171,19 @@ const loadDistributedPartialHarvestItems = async () => {
   } */
 };
 
+async function populatePackingLists() {
+  for (const group of shareSizeGroups.value) {
+    const list = await getPackingList(group);
+    packingLists.value.set(group.id, list);
+  }
+}
+
+function setPackingListVisibility() {
+  shareSizeGroups.value.forEach((group) => {
+    packingListToggled.value.push(false);
+  });
+}
+
 onMounted(async () => {
   //console.log("amountsPerMembergroup ", amountsPerMembergroup);
   console.log("memberGroups: ", memberGroups);
@@ -167,11 +191,8 @@ onMounted(async () => {
   await loadHarvestItems();
   await loadDistributedPartialHarvestItems();
   populateDistributionMatrix();
-
-  for (const group of shareSizeGroups.value) {
-    const list = await getPackingList(group);
-    packingLists.value.set(group.id, list);
-  }
+  populatePackingLists();
+  setPackingListVisibility();
 
   console.log("packingLists", packingLists);
 });
@@ -215,6 +236,11 @@ function getRemainingAmount(shareSizeGroupIndex = 0) {
 }
 
 async function saveDistribution() {
+  if (initialPackingNotes.value !== packingNotes.value) {
+    console.log("saving packing notes");
+    await savePackingNotes(commissioningId, packingNotes.value);
+  }
+
   if (!activeHarvestItem.value) {
     console.error("No active harvest item selected.");
     alert("Wähle zuerst einen zu verteilenden Posten aus.");
@@ -258,9 +284,7 @@ async function saveDistribution() {
       }
     }
 
-    distributedPartialHarvestItems.value =
-      await getPartialDistributedHarvestItemsOfCommissioning(commissioningId);
-
+    updatePartialDistributedHarvestItems();
     populateDistributionMatrix();
   } catch (error) {
     console.error("Error saving distribution:", error);
@@ -275,6 +299,15 @@ watch(activeHarvestItem, (value) => {
   console.log("activeHarvestItem changed", value);
   populateDistributionMatrix();
 });
+
+watch(distributedPartialHarvestItems, () => {
+  populatePackingLists();
+});
+
+async function updatePartialDistributedHarvestItems() {
+  distributedPartialHarvestItems.value =
+    await getPartialDistributedHarvestItemsOfCommissioning(route.params.id);
+}
 </script>
 
 <template>
@@ -412,9 +445,39 @@ watch(activeHarvestItem, (value) => {
           <UButton @click="saveDistribution()">Verteilung speichern</UButton>
         </div>
       </div>
-      <PackingListPrinter
-        :packing-list="packingLists.get(shareSizeGroup.id)"
-      ></PackingListPrinter>
+      <div class="my-4">
+        <p class="my-2">Notizen für die Packer:innen:</p>
+        <UTextarea class="my-2" v-model="packingNotes"></UTextarea>
+      </div>
+      <div class="card bg-green-50 my-5 p-5">
+        <div
+          class="flex justify-between"
+          @click="
+            packingListToggled[shareSizeGroupIndex] =
+              !packingListToggled[shareSizeGroupIndex]
+          "
+        >
+          <div class="flex items-center">
+            <UIcon name="i-heroicons-queue-list" />
+            <span class="ml-2">Packliste(n)</span>
+          </div>
+          <div>
+            <UIcon
+              :name="
+                packingListToggled[shareSizeGroupIndex]
+                  ? 'i-heroicons-chevron-up-solid'
+                  : 'i-heroicons-chevron-down-solid'
+              "
+            />
+          </div>
+        </div>
+        <div v-if="packingListToggled[shareSizeGroupIndex]">
+          <PackingListPrinter
+            :packing-list="packingLists.get(shareSizeGroup.id)"
+            :notes="packingNotes"
+          ></PackingListPrinter>
+        </div>
+      </div>
     </div>
   </div>
 </template>

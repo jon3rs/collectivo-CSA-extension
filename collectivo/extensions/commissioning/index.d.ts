@@ -28,6 +28,7 @@ declare global {
     id: number;
     name_of_harvest: string;
     com_harvest_item: (number | HarvestItem)[];
+    harvest_notes: string;
   }
 
   interface comCommissioning {
@@ -37,6 +38,7 @@ declare global {
       | number
       | distributedPartialHarvestItem
     )[];
+    packing_notes: string;
   }
 
   interface comShareSize {

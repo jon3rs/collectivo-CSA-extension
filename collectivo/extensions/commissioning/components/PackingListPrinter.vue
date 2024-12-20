@@ -1,12 +1,17 @@
 <script setup lang="ts">
-const printableArea = ref<HTMLElement | null>(null);
-
 const props = defineProps({
   packingList: {
     type: Object as PropType<PackingList>,
     required: false,
   },
+  notes: {
+    type: String,
+    required: false,
+    default: "",
+  },
 });
+
+const printableArea = ref<HTMLElement | null>(null);
 
 onMounted(() => {
   console.log("thepackinglist", props.packingList);
@@ -47,9 +52,9 @@ function printTables() {
 </script>
 
 <template>
-  <div v-if="packingList" ref="printableArea">
-    <UButton @click="printTables()">printTables</UButton>
-    <h3>{{ packingList?.nameOfPackingList }}</h3>
+  <div v-if="packingList" ref="printableArea" class="packing-list">
+    <h3 class="mt-5 align-middle">{{ packingList?.nameOfPackingList }}</h3>
+
     <table>
       <thead>
         <tr>
@@ -79,26 +84,50 @@ function printTables() {
           </td>
         </tr>
       </tbody>
-      <tbody></tbody>
+      <tfoot>
+        <tr>
+          <th v-for="footerItem in packingList.packingList">
+            {{ footerItem[footerItem.length - 1] }}
+          </th>
+        </tr>
+      </tfoot>
     </table>
+    <div>
+      <p class="my-5">Notizen für die Packer:innen :)</p>
+      <p>{{ notes }}</p>
+    </div>
+    <div class="flex justify-end mt-5 print:hidden">
+      <UButton icon="i-heroicons-printer" @click="printTables()"
+        >printTables</UButton
+      >
+    </div>
   </div>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @media print {
-  table {
+  .packing-list {
     page-break-after: always;
   }
 }
 table {
   @apply w-full;
 }
+table,
+th,
+tr,
+td {
+  @apply border-2 border-collapse border-black text-center;
+}
+tr {
+  @apply even:bg-gray-100;
+}
 @media print {
   table,
   th,
   tr,
   td {
-    @apply border-2 border-collapse border-black;
+    @apply border-2 border-collapse border-black text-center;
   }
   tr {
     @apply even:bg-gray-100;

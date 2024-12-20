@@ -24,13 +24,15 @@ export async function updateHarvest(harvest: Harvest): Promise<Harvest> {
 
 export async function createHarvest(
   harvestName: string,
-  harvestItems?: HarvestItem[]
+  harvestItems?: HarvestItem[],
+  harvestNotes?: string
 ): Promise<Harvest> {
   const directus = useDirectus();
 
   const harvest = await directus.request(
     createItem("com_harvest", {
       name_of_harvest: harvestName,
+      harvest_notes: harvestNotes,
     })
   );
 

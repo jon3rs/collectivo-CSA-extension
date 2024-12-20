@@ -43,4 +43,15 @@ schema.fields = [
     },
     type: "alias",
   },
+  {
+    collection: "com_commissioning",
+    field: "packing_notes",
+    meta: {
+      interface: "input-multiline",
+      options: {
+        clear: true,
+      },
+    },
+    type: "text",
+  },
 ];

@@ -1,4 +1,4 @@
-import { readItems, createItem, updateItem } from "@directus/sdk";
+import { readItems, createItem, updateItem, readItem } from "@directus/sdk";
 
 export async function createCommissioning(
   harvestId: object
@@ -15,6 +15,30 @@ export async function createCommissioning(
   );
 
   console.log("result: ", result, updatedHarvest);
+
+  return result;
+}
+
+export async function getPackingNotes(
+  commissioningId: number
+): Promise<string> {
+  const directus = useDirectus();
+
+  const result = await directus.request(
+    readItem("com_commissioning", commissioningId)
+  );
+
+  return result.packing_notes as string;
+}
+
+export async function savePackingNotes(commissioningId: number, notes: string) {
+  const directus = useDirectus();
+
+  const result = await directus.request(
+    updateItem("com_commissioning", commissioningId, {
+      packing_notes: notes,
+    })
+  );
 
   return result;
 }

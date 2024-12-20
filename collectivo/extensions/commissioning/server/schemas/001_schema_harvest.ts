@@ -57,6 +57,17 @@ schema.fields = [
     },
     type: "integer",
   },
+  {
+    collection: "com_harvest",
+    field: "harvest_notes",
+    meta: {
+      interface: "input-multiline",
+      options: {
+        clear: true,
+      },
+    },
+    type: "text",
+  },
 ];
 
 schema.relations = [

@@ -18,10 +18,13 @@ const emit = defineEmits(["toggle", "cancel", "harvestAdded"]);
 const initialHarvest = ref<Partial<Harvest>>({
   name_of_harvest: "",
   com_harvest_item: [],
+  harvest_notes: "",
 });
 
 const nameOfHarvest = ref("");
 const harvestItems = ref<HarvestItem[]>([]);
+
+const harvestNote = ref(props?.harvest?.harvest_notes || "");
 
 onMounted(async () => {
   if (props.harvest) {
@@ -32,6 +35,7 @@ onMounted(async () => {
 async function loadHarvestData(harvest: Harvest) {
   nameOfHarvest.value = harvest.name_of_harvest;
   initialHarvest.value.name_of_harvest = harvest.name_of_harvest;
+  initialHarvest.value.harvest_notes = harvest.harvest_notes;
   console.log("loading harvest data", harvest);
 
   harvestItems.value = await Promise.all(
@@ -68,6 +72,7 @@ function saveHarvest(id?: number) {
       id: props.harvest.id,
       name_of_harvest: nameOfHarvest.value,
       com_harvest_item: toRaw(harvestItems.value),
+      harvest_notes: harvestNote.value,
     };
 
     updateHarvest(updatedHarvest).then((response: Harvest) => {
@@ -80,13 +85,15 @@ function saveHarvest(id?: number) {
 
   console.log("no Id", props?.harvest?.id);
 
-  createHarvest(nameOfHarvest.value, harvestItems.value).then(
-    (response: Harvest) => {
-      loadHarvestData(response);
-      emit("harvestAdded", response);
-      console.log("harvest added", response);
-    }
-  );
+  createHarvest(
+    nameOfHarvest.value,
+    harvestItems.value,
+    harvestNote.value
+  ).then((response: Harvest) => {
+    loadHarvestData(response);
+    emit("harvestAdded", response);
+    console.log("harvest added", response);
+  });
 }
 
 function addBlankHarvestItem() {
@@ -130,6 +137,20 @@ function arraysEqual(a: any[], b: any[]): boolean {
 
 const nameHasChanged = computed(() => {
   return initialHarvest?.value?.name_of_harvest !== nameOfHarvest.value;
+});
+
+const notesHaveChanged = computed(() => {
+  console.log(
+    "notes state",
+    initialHarvest?.value?.harvest_notes,
+    harvestNote.value
+  );
+
+  const stringToCompare = initialHarvest?.value?.harvest_notes
+    ? initialHarvest?.value?.harvest_notes
+    : "";
+
+  return stringToCompare !== harvestNote.value;
 });
 
 const harvestItemsHaveChanged = computed(() => {
@@ -242,18 +263,26 @@ async function startCommissioning() {
           @click="addBlankHarvestItem()"
         />
       </div>
+      <div class="mt-2">
+        <p>Notizen zur Ernte:</p>
+        <UTextarea v-model="harvestNote" />
+      </div>
 
       <div class="mt-5 flex justify-end">
         <UButton
           color="gray"
           label="abbrechen"
-          :disabled="!nameHasChanged && !harvestItemsHaveChanged"
+          :disabled="
+            !nameHasChanged && !harvestItemsHaveChanged && !notesHaveChanged
+          "
           @click="cancel()"
         />
         <UButton
           class="ml-2"
           :label="props.harvest ? 'Änderungen speichern' : 'Ernte anlegen'"
-          :disabled="!nameHasChanged && !harvestItemsHaveChanged"
+          :disabled="
+            !nameHasChanged && !harvestItemsHaveChanged && !notesHaveChanged
+          "
           @click="saveHarvest()"
         />
       </div>
